@@ -29,7 +29,7 @@ void CuDispatcher::dispatch(const size_t queue_idx,
   dispatch_fn(queue_idx);
 }
 
-void CuDispatcher::synchronize(size_t queue_idx) {
+void CuDispatcher::sync(size_t queue_idx) {
   SPD_TRACE_FUNC;
 
   CUDA_CHECK(cudaStreamSynchronize(streams_[queue_idx]));

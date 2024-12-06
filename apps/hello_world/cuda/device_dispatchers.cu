@@ -6,11 +6,10 @@
 
 namespace cuda {
 
-void run_stage1(CuDispatcher &dispatcher, AppData &app_data) {
+void run_stage1(AppData &app_data, const cudaStream_t stream) {
   constexpr auto threads = 256;
   const auto blocks = div_up(app_data.n, threads);
   constexpr auto s_mem = 0;
-  const auto stream = dispatcher.stream(0);
 
   spdlog::debug(
       "CUDA kernel 'vector_add', n = {}, threads = {}, blocks = {}, stream: {}",

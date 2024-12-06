@@ -18,7 +18,7 @@ class CuDispatcher final : public Dispatcher {
   void dispatch(const size_t queue_idx,
                 std::function<void(size_t)> dispatch_fn) override;
 
-  void synchronize(size_t queue_idx) override;
+  void sync(size_t queue_idx) override;
 
   // Cuda Specific
   [[nodiscard]] cudaStream_t stream(size_t queue_idx) const {

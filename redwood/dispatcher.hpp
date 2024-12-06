@@ -18,7 +18,7 @@ class Dispatcher {
   virtual void dispatch(const size_t queue_idx,
                         std::function<void(size_t)> dispatch_fn) = 0;
 
-  virtual void synchronize(size_t queue_idx) = 0;
+  virtual void sync(size_t queue_idx) = 0;
 
  protected:
   const size_t n_concurrent_;

@@ -31,10 +31,10 @@ void run_cuda_backend_demo(size_t n) {
   auto mr = std::make_shared<cuda::CudaMemoryResource>();
 
   AppData app_data(mr.get(), n);
-  cuda::CuDispatcher dispatcher(mr, 1);
+  cuda::CuDispatcher disp(mr, 1);
 
-  cuda::run_stage1(dispatcher, app_data);
-  dispatcher.synchronize(0);
+  cuda::run_stage1(app_data, disp.stream(0));
+  disp.sync(0);
 
   print_output(app_data);
 }
