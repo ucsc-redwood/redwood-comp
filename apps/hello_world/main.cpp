@@ -4,7 +4,6 @@
 #include <memory_resource>
 
 #include "app_data.hpp"
-#include "apps/hello_world/cuda/device_dispatchers.cuh"
 #include "host/host_dispatchers.hpp"
 #include "redwood/backends.hpp"
 
