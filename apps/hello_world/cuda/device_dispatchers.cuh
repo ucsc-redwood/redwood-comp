@@ -1,8 +1,9 @@
 #pragma once
 
-#include <cuda_runtime_api.h>
-
 #include "../app_data.hpp"
+
+struct CUstream_st;
+using cudaStream_t = CUstream_st *;
 
 namespace cuda {
 
