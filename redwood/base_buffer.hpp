@@ -3,12 +3,12 @@
 #include <cstddef>
 
 class BaseBuffer {
-public:
+ public:
   BaseBuffer() = delete;
   explicit BaseBuffer(size_t size) : size_(size) {}
   virtual ~BaseBuffer() = default;
 
-protected:
+ protected:
   virtual void allocate() = 0;
   virtual void free() = 0;
 

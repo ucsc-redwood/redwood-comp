@@ -4,5 +4,5 @@
 
 #include <source_location>
 
-#define SPD_TRACE_FUNC                                                         \
+#define SPD_TRACE_FUNC \
   spdlog::trace(std::source_location::current().function_name());

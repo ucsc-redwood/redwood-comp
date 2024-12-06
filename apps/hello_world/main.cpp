@@ -1,11 +1,25 @@
 #include <spdlog/spdlog.h>
 
 #include <CLI/CLI.hpp>
-#include <algorithm>
 
-#include "app_data.hpp"
-#include "cuda/device_dispatchers.cuh"
-#include "host_dispatchers.hpp"
+#include "redwood/cuda/cu_buffer.cuh"
+#include "redwood/host/host_buffer.hpp"
+#include "redwood/uni_engine.hpp"
+
+template <typename BufferT>
+  requires std::is_base_of_v<BaseBuffer, BufferT>
+struct AppData {
+  explicit AppData(UniEngine &eng, const size_t n) : n(n) {
+    input_a = eng.buffer<BufferT>(n);
+    input_b = eng.buffer<BufferT>(n);
+    output = eng.buffer<BufferT>(n);
+  }
+
+  const size_t n;
+  std::shared_ptr<BufferT> input_a;
+  std::shared_ptr<BufferT> input_b;
+  std::shared_ptr<BufferT> output;
+};
 
 int main(int argc, char **argv) {
   CLI::App app("Hello World");
@@ -17,21 +31,13 @@ int main(int argc, char **argv) {
   spdlog::set_level(spdlog::level::trace);
 
   // Initialize compute engine and application data
-  cuda::Engine engine;
+  UniEngine engine;
 
-  AppData app_data(engine, 1024);
-
-  // Run the stage 1 of the application
   if (use_cuda) {
-    cuda::run_stage1(engine, app_data);
-    engine.sync();
-  } else {
-    cpu::run_stage1(app_data).wait();
-  }
+    AppData<cuda::Buffer> app_data(engine, 1024);
 
-  // print the first 10 elements of output
-  for (size_t i = 0; i < 10; ++i) {
-    spdlog::info("output[{}] = {}", i, app_data.output->at(i));
+  } else {
+    AppData<cpu::HostBuffer> app_data(engine, 1024);
   }
 
   return EXIT_SUCCESS;

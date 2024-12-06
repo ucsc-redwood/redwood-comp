@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../buffer.hpp"
+#include "../base_buffer.hpp"
 
 namespace cuda {
 
