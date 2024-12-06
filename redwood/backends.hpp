@@ -19,6 +19,10 @@ constexpr BackendType kBackendType = BackendType::kCPU
 #endif
     ;
 
+// ----------------------------------------------------------------------------
+// Check if a backend is enabled (compile-time)
+// ----------------------------------------------------------------------------
+
 [[nodiscard]] constexpr bool is_backend_enabled(const BackendType backend) {
   return (kBackendType & backend) == backend;
 }

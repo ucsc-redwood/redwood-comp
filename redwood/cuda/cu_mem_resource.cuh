@@ -3,6 +3,10 @@
 #include <memory_resource>
 namespace cuda {
 
+// ----------------------------------------------------------------------------
+// CudaMemoryResource implementation
+// ----------------------------------------------------------------------------
+
 class CudaMemoryResource : public std::pmr::memory_resource {
  protected:
   void* do_allocate(std::size_t bytes, std::size_t) override;

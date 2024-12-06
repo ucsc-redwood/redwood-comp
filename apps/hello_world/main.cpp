@@ -26,7 +26,8 @@ void print_output(const AppData& app_data) {
 
 void run_cuda_backend_demo(const size_t n) {
   cuda::CudaMemoryResource cuda_mr;
-  AppData app_data(n, &cuda_mr);
+  AppData app_data(&cuda_mr, n);
+
   cuda::run_stage1(app_data);
   print_output(app_data);
 }
@@ -41,7 +42,7 @@ void run_cuda_backend_demo(const size_t n) {
 void run_vulkan_backend_demo(const size_t n) {
   vulkan::Engine engine;
   vulkan::VulkanMemoryResource vk_mr(engine);
-  AppData app_data(n, &vk_mr);
+  AppData app_data(&vk_mr, n);
 
   vulkan::run_stage1(engine, app_data);
   print_output(app_data);
@@ -51,7 +52,7 @@ void run_vulkan_backend_demo(const size_t n) {
 
 void run_cpu_backend_demo(const size_t n) {
   auto host_mr = std::pmr::new_delete_resource();
-  AppData app_data(n, host_mr);
+  AppData app_data(host_mr, n);
 
   cpu::run_stage1(app_data).wait();
   print_output(app_data);

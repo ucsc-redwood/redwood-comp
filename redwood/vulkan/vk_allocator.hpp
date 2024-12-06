@@ -18,9 +18,6 @@ class VulkanMemoryResource : public std::pmr::memory_resource {
  public:
   explicit VulkanMemoryResource(Engine& engine) : engine_(engine) {}
 
-  // Engine& get_engine() { return engine_; }
-  // const Engine& get_engine() const { return engine_; }
-
  protected:
   void* do_allocate(std::size_t bytes, std::size_t) override {
     auto buffer = engine_.buffer(bytes);
@@ -39,7 +36,6 @@ class VulkanMemoryResource : public std::pmr::memory_resource {
 
  private:
   Engine& engine_;
-  // std::unordered_map<void*, std::shared_ptr<Buffer>> buffers_;
 };
 
 }  // namespace vulkan

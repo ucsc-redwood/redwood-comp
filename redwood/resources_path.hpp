@@ -4,6 +4,11 @@
 
 namespace helpers {
 
+// ----------------------------------------------------------------------------
+// Helper function to get the path to the resources directory
+// Based on the platform, this will be different.
+// ----------------------------------------------------------------------------
+
 [[nodiscard]] inline std::filesystem::path get_resource_base_path() {
 #if defined(__ANDROID__)
   return "/data/local/tmp/resources/";
