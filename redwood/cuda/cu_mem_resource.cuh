@@ -7,6 +7,8 @@
 #include "../utils.hpp"
 #include "helpers.cuh"
 
+namespace cuda {
+
 class CudaMemoryResource : public std::pmr::memory_resource {
  protected:
   void* do_allocate(std::size_t bytes, std::size_t) override {
@@ -30,3 +32,5 @@ class CudaMemoryResource : public std::pmr::memory_resource {
     return dynamic_cast<const CudaMemoryResource*>(&other) != nullptr;
   }
 };
+
+}  // namespace cuda

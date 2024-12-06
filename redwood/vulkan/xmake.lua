@@ -4,7 +4,6 @@ option("vulkan-backend")
     set_default(false)
     set_showmenu(true)
     set_description("Enable Vulkan backend")
-    add_defines("REDWOOD_VULKAN_BACKEND")
 option_end()
 
 if has_config("vulkan-backend") then

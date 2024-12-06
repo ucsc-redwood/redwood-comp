@@ -100,13 +100,15 @@ class Engine final : public BaseEngine {
   //  * @brief Creates a typed Vulkan buffer
   //  *
   //  * Creates a new TypedBuffer instance for a specific data type. Provides
-  //  * type-safe access to buffer memory. If resource management is enabled, the
+  //  * type-safe access to buffer memory. If resource management is enabled,
+  //  the
   //  * buffer's lifetime will be tracked by the engine.
   //  *
   //  * @tparam T Data type for the buffer (e.g., float, int, custom struct)
   //  * @tparam Args Constructor argument types for TypedBuffer
   //  * @param args Arguments forwarded to TypedBuffer constructor
-  //  * @return std::shared_ptr<TypedBuffer<T>> Shared pointer to the created typed
+  //  * @return std::shared_ptr<TypedBuffer<T>> Shared pointer to the created
+  //  typed
   //  * buffer
   //  *
   //  * Example:
@@ -141,12 +143,14 @@ class Engine final : public BaseEngine {
   //  * @brief Creates a compute algorithm from a shader
   //  *
   //  * Creates a new Algorithm instance using the specified shader and buffer
-  //  * bindings. If resource management is enabled, the algorithm's lifetime will
+  //  * bindings. If resource management is enabled, the algorithm's lifetime
+  //  will
   //  * be tracked by the engine.
   //  *
   //  * @param shader_path Path to the SPIR-V compute shader file
   //  * @param buffers Vector of buffers to bind to the shader
-  //  * @return std::shared_ptr<Algorithm> Shared pointer to the created algorithm
+  //  * @return std::shared_ptr<Algorithm> Shared pointer to the created
+  //  algorithm
   //  *
   //  * Example:
   //  * @code
@@ -174,7 +178,8 @@ class Engine final : public BaseEngine {
   //  * @brief Creates a command sequence for executing compute operations
   //  *
   //  * Creates a new Sequence instance for recording and executing compute
-  //  * commands. If resource management is enabled, the sequence's lifetime will
+  //  * commands. If resource management is enabled, the sequence's lifetime
+  //  will
   //  * be tracked by the engine.
   //  *
   //  * @return std::shared_ptr<Sequence> Shared pointer to the created sequence
