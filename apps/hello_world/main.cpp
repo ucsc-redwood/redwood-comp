@@ -23,6 +23,7 @@ void print_output(const AppData& app_data) {
 
 #include <cuda_runtime_api.h>
 
+#include "cuda/device_dispatchers.cuh"
 #include "redwood/cuda/cu_dispatcher.cuh"
 #include "redwood/cuda/cu_mem_resource.cuh"
 
