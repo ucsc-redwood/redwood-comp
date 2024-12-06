@@ -8,10 +8,10 @@ template <typename T>
 using BufferPtr = std::shared_ptr<TypedBuffer<T>>;
 
 struct AppData {
-  explicit AppData(Engine &engine, const size_t n) : n(n) {
-    input_a = engine.typed_buffer<int>(n);
-    input_b = engine.typed_buffer<int>(n);
-    output = engine.typed_buffer<int>(n);
+  explicit AppData(Engine &eng, const size_t n) : n(n) {
+    input_a = eng.buffer<int>(n)->fill(1);
+    input_b = eng.buffer<int>(n)->fill(2);
+    output = eng.buffer<int>(n)->zeros();
   }
 
   const size_t n;

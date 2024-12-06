@@ -16,8 +16,7 @@ class Engine {
 
   template <typename T, typename... Args>
     requires std::is_constructible_v<cuda::TypedBuffer<T>, Args...>
-  [[nodiscard]] std::shared_ptr<cuda::TypedBuffer<T>> typed_buffer(
-      Args &&...args) {
+  [[nodiscard]] std::shared_ptr<cuda::TypedBuffer<T>> buffer(Args &&...args) {
     const auto buffer = std::make_shared<cuda::TypedBuffer<T>>(args...);
 
     if (manage_resources_) {

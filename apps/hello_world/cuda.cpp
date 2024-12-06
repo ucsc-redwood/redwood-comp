@@ -21,9 +21,6 @@ int main(int argc, char **argv) {
 
   cuda::AppData app_data(engine, 1024);
 
-  std::ranges::fill(*app_data.input_a, 1);
-  std::ranges::fill(*app_data.input_b, 2);
-
   // Run the stage 1 of the application
   if (use_cuda) {
     cuda::run_stage1(engine, app_data);
