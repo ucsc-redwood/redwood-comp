@@ -1,35 +1,43 @@
-#include <spdlog/spdlog.h>
+// #include <spdlog/spdlog.h>
 
-#include "device_dispatchers.cuh"
-#include "device_kernels.cuh"
-#include "redwood/cuda/helpers.cuh"
+// #include "device_dispatchers.cuh"
+// #include "device_kernels.cuh"
+// #include "redwood/cuda/cu_dispatcher.cuh"
+// #include "redwood/cuda/helpers.cuh"
 
-namespace cuda {
+// namespace cuda {
 
-void run_stage1(AppData &app_data) {
-  constexpr auto threads = 256;
-  const auto blocks = div_up(app_data.n, threads);
-  constexpr auto s_mem = 0;
-  //   const auto stream = engine.stream(0);
+// // void run_stage1(AppData &app_data) {
+// //   constexpr auto threads = 256;
+// //   const auto blocks = div_up(app_data.n, threads);
+// //   constexpr auto s_mem = 0;
+// //   //   const auto stream = engine.stream(0);
 
-  spdlog::debug(
-      "CUDA kernel 'vector_add', n = {}, threads = {}, blocks = {}, on",
-      //   stream: "
-      //   "{}",
-      app_data.n,
-      threads,
-      blocks
-      //   reinterpret_cast<void *>(stream)
-  );
+// //   spdlog::debug(
+// //       "CUDA kernel 'vector_add', n = {}, threads = {}, blocks = {}, on",
+// //       //   stream: "
+// //       //   "{}",
+// //       app_data.n,
+// //       threads,
+// //       blocks
+// //       //   reinterpret_cast<void *>(stream)
+// //   );
 
-  cuda::kernels::vector_add<<<blocks, threads, s_mem>>>(
-      app_data.u_input_a.data(),
-      app_data.u_input_b.data(),
-      app_data.u_output.data(),
-      0,
-      app_data.n);
+// //   cuda::kernels::vector_add<<<blocks, threads, s_mem>>>(
+// //       app_data.u_input_a.data(),
+// //       app_data.u_input_b.data(),
+// //       app_data.u_output.data(),
+// //       0,
+// //       app_data.n);
 
-  CUDA_CHECK(cudaDeviceSynchronize());
-}
+// //   CUDA_CHECK(cudaDeviceSynchronize());
+// // }
 
-}  // namespace cuda
+// void run_stage1(AppData &app_data) {
+//   CuDispatcher dispatcher(app_data.mr, 1);
+
+
+//   });
+// }
+
+// }  // namespace cuda
