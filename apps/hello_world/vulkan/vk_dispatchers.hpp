@@ -8,4 +8,3 @@ namespace vulkan {
 void run_stage1(Engine &engine, AppData &app_data);
 
 }  // namespace vulkan
-
