@@ -1,19 +1,19 @@
-#include "cu_buffer.cuh"
+#include <cuda_runtime.h>
 
 #include "../utils.hpp"
-
-#include <cuda_runtime.h>
+#include "cu_buffer.cuh"
+#include "helpers.cuh"
 
 namespace cuda {
 
 void Buffer::allocate() {
   SPD_TRACE_FUNC;
-  cudaMallocManaged(&mapped_data_, size_);
+  CUDA_CHECK(cudaMallocManaged(&mapped_data_, size_));
 }
 
 void Buffer::free() {
   SPD_TRACE_FUNC;
-  cudaFree(mapped_data_);
+  CUDA_CHECK(cudaFree(mapped_data_));
 }
 
-} // namespace cuda
+}  // namespace cuda

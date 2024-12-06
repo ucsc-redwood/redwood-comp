@@ -4,8 +4,6 @@
 
 #include <memory>
 
-
-
 namespace app {
 
 // --------------------------------------------------------------------------
@@ -34,9 +32,7 @@ private:
   std::shared_ptr<cuda::TypedBuffer<int>> u_buffer_C;
 };
 
-
 } // namespace demo
-
 
 // --------------------------------------------------------------------------
 // Kernels
@@ -46,7 +42,5 @@ private:
 // Dispatcher
 // the purpose of dispatcher is to launch
 // --------------------------------------------------------------------------
-
-
 
 } // namespace app

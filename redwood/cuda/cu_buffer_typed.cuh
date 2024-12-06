@@ -1,19 +1,19 @@
 #pragma once
 
-#include "cu_buffer.cuh"
-
 #include <algorithm>
 #include <cstring>
 #include <memory>
 #include <random>
 #include <vector>
 
+#include "cu_buffer.cuh"
+
 namespace cuda {
 
 template <typename T>
 class TypedBuffer final : public Buffer,
                           public std::enable_shared_from_this<TypedBuffer<T>> {
-public:
+ public:
   // Add iterator type aliases
   using value_type = T;
   using pointer = T *;
@@ -88,9 +88,10 @@ public:
   }
 
   template <typename RNG = std::mt19937>
-  [[nodiscard]] auto
-  random(const T min = T{}, const T max = std::numeric_limits<T>::max(),
-         const typename RNG::result_type seed = std::random_device{}())
+  [[nodiscard]] auto random(
+      const T min = T{},
+      const T max = std::numeric_limits<T>::max(),
+      const typename RNG::result_type seed = std::random_device{}())
       -> std::shared_ptr<TypedBuffer<T>> {
     RNG gen(seed);
 
@@ -107,16 +108,16 @@ public:
     return this->shared_from_this();
   }
 
-  auto
-  from_vector(const std::vector<T> &vec) -> std::shared_ptr<TypedBuffer<T>> {
+  auto from_vector(const std::vector<T> &vec)
+      -> std::shared_ptr<TypedBuffer<T>> {
     assert(vec.size() == count_);
     std::ranges::copy(vec, mapped_typed_data_);
     return this->shared_from_this();
   }
 
-private:
+ private:
   T *mapped_typed_data_;
   const size_t count_;
 };
 
-} // namespace cuda
+}  // namespace cuda

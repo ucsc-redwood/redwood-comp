@@ -5,15 +5,15 @@
 namespace cuda {
 
 class Buffer : public BaseBuffer {
-public:
+ public:
   Buffer() = delete;
   explicit Buffer(const size_t size) : BaseBuffer(size) { allocate(); }
 
   ~Buffer() override { free(); }
 
-protected:
+ protected:
   void allocate() override;
   void free() override;
 };
 
-} // namespace cuda
+}  // namespace cuda
