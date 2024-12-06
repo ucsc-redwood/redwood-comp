@@ -11,8 +11,7 @@ namespace kernels {
 __global__ void vector_add(const float *input_a,
                            const float *input_b,
                            float *output,
-                           size_t start,
-                           size_t end);
+                           const size_t n);
 
 }
 

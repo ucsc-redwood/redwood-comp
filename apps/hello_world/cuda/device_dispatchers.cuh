@@ -1,9 +1,10 @@
-// #pragma once
+#pragma once
 
-// #include "../app_data.hpp"
+#include "../app_data.hpp"
+#include "redwood/cuda/cu_dispatcher.cuh"
 
-// namespace cuda {
+namespace cuda {
 
-// void run_stage1(AppData &app_data);
+void run_stage1(CuDispatcher &dispatcher, AppData &app_data);
 
-// }  // namespace cuda
+}  // namespace cuda

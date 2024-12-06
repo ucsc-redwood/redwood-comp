@@ -7,10 +7,9 @@ namespace kernels {
 __global__ void vector_add(const float *input_a,
                            const float *input_b,
                            float *output,
-                           size_t start,
-                           size_t end) {
+                           const size_t n) {
   const auto i = threadIdx.x + blockIdx.x * blockDim.x;
-  if (i >= start && i < end) {
+  if (i < n) {
     output[i] = input_a[i] + input_b[i];
   }
 }

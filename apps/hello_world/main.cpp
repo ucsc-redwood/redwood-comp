@@ -4,6 +4,7 @@
 #include <memory_resource>
 
 #include "app_data.hpp"
+#include "apps/hello_world/cuda/device_dispatchers.cuh"
 #include "host/host_dispatchers.hpp"
 #include "redwood/backends.hpp"
 
@@ -21,56 +22,20 @@ void print_output(const AppData& app_data) {
 
 #ifdef REDWOOD_CUDA_BACKEND
 
-// #include "cuda/device_dispatchers.cuh"
-#include "cuda/device_kernels.cuh"
+#include <cuda_runtime_api.h>
+
 #include "redwood/cuda/cu_dispatcher.cuh"
 #include "redwood/cuda/cu_mem_resource.cuh"
-#include "redwood/cuda/helpers.cuh"
 
-void run_cuda_backend_demo(const size_t n) {
+void run_cuda_backend_demo(size_t n) {
   auto mr = std::make_shared<cuda::CudaMemoryResource>();
 
   AppData app_data(mr.get(), n);
-
-  // cuda::run_stage1(app_data);
-
   cuda::CuDispatcher dispatcher(mr, 1);
-  constexpr size_t my_queue_idx = 0;
 
-  dispatcher.dispatch(my_queue_idx, [&](const size_t stream_id) {
-    constexpr auto threads = 256;
-    const auto blocks = div_up(app_data.n, threads);
-    constexpr auto s_mem = 0;
+  cuda::run_stage1(dispatcher, app_data);
+  dispatcher.synchronize(0);
 
-    auto start = 0;
-    auto end = app_data.n;
-    void* args[] = {app_data.u_input_a.data(),
-                    app_data.u_input_b.data(),
-                    app_data.u_output.data(),
-                    &start,
-                    &end};
-
-    cudaLaunchKernel(
-        (void*)cuda::kernels::vector_add,  // Function pointer to the kernel
-        dim3(blocks),                      // Grid dimensions
-        dim3(threads),                     // Block dimensions
-        args,                              // Arguments to the kernel
-        s_mem,                             // Shared memory size
-        dispatcher.stream(stream_id)       // Stream
-    );
-
-    // cuda::kernels::
-    //     vector_add<<<blocks, threads, s_mem, dispatcher.stream(stream_id)>>>(
-    //         app_data.u_input_a.data(),
-    //         app_data.u_input_b.data(),
-    //         app_data.u_output.data(),
-    //         0,
-    //         app_data.n);
-  });
-
-  CUDA_CHECK(cudaDeviceSynchronize());
-
-  // dispatcher.synchronize(my_queue_idx);
   print_output(app_data);
 }
 
