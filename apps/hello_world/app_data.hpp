@@ -2,8 +2,6 @@
 
 #include "redwood/cuda/cuda_engine.cuh"
 
-namespace cuda {
-
 template <typename T>
 using BufferPtr = std::shared_ptr<TypedBuffer<T>>;
 
@@ -19,5 +17,3 @@ struct AppData {
   BufferPtr<int> input_b;
   BufferPtr<int> output;
 };
-
-}  // namespace cuda
