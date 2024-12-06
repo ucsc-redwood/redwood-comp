@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
   std::ranges::fill(v_vk2, 6);
 
   // print cpu vectors
-  for (size_t i = 0; i < n; ++i) {
+  for (size_t i = 0; i < 10; ++i) {
     std::cout << v_cpu1[i] << " " << v_cpu2[i] << std::endl;
   }
 
@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
   // }
 
   // print vulkan vectors
-  for (size_t i = 0; i < n; ++i) {
+  for (size_t i = 0; i < 10; ++i) {
     std::cout << v_vk1[i] << " " << v_vk2[i] << std::endl;
   }
 
