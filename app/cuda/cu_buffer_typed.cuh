@@ -1,11 +1,18 @@
 #pragma once
 
 #include "cu_buffer.cuh"
-#include <iterator>
+
+#include <algorithm>
+#include <cstring>
+#include <memory>
+#include <random>
+#include <vector>
 
 namespace cuda {
 
-template <typename T> class TypedBuffer final : public Buffer {
+template <typename T>
+class TypedBuffer final : public Buffer,
+                          public std::enable_shared_from_this<TypedBuffer<T>> {
 public:
   // Add iterator type aliases
   using value_type = T;
@@ -44,9 +51,10 @@ public:
 
   // Size information
   [[nodiscard]] size_type size() const { return count_; }
+  [[nodiscard]] size_type size_bytes() const { return count_ * sizeof(T); }
   [[nodiscard]] bool empty() const { return count_ == 0; }
 
-  // Existing methods
+  // Data access
   [[nodiscard]] T *data() { return reinterpret_cast<T *>(mapped_data_); }
   [[nodiscard]] const T *data() const {
     return reinterpret_cast<const T *>(mapped_data_);
@@ -55,6 +63,55 @@ public:
   [[nodiscard]] T &at(const size_t index) { return mapped_typed_data_[index]; }
   [[nodiscard]] const T &at(const size_t index) const {
     return mapped_typed_data_[index];
+  }
+
+  // --------------------------------------------------------------------------
+  // Helper functions to quickly fill the buffer as you construct it
+  // --------------------------------------------------------------------------
+
+  [[nodiscard]] auto fill(const T &value) -> std::shared_ptr<TypedBuffer<T>> {
+    std::ranges::fill(*this, value);
+    return this->shared_from_this();
+  }
+
+  [[nodiscard]] auto zeros() -> std::shared_ptr<TypedBuffer<T>> {
+    if constexpr (std::is_trivially_constructible_v<T>) {
+      std::memset(mapped_typed_data_, 0, size_bytes());
+      return this->shared_from_this();
+    } else {
+      return fill(T{});
+    }
+  }
+
+  [[nodiscard]] auto ones() -> std::shared_ptr<TypedBuffer<T>> {
+    return fill(T{1});
+  }
+
+  template <typename RNG = std::mt19937>
+  [[nodiscard]] auto
+  random(const T min = T{}, const T max = std::numeric_limits<T>::max(),
+         const typename RNG::result_type seed = std::random_device{}())
+      -> std::shared_ptr<TypedBuffer<T>> {
+    RNG gen(seed);
+
+    if constexpr (std::floating_point<T>) {
+      std::uniform_real_distribution<T> dis(min, max);
+      std::ranges::generate(*this, [&]() { return dis(gen); });
+    } else if constexpr (std::integral<T>) {
+      std::uniform_int_distribution<T> dis(min, max);
+      std::ranges::generate(*this, [&]() { return dis(gen); });
+    } else {
+      static_assert(std::floating_point<T> || std::integral<T>,
+                    "random() only supports floating point or integral types");
+    }
+    return this->shared_from_this();
+  }
+
+  auto
+  from_vector(const std::vector<T> &vec) -> std::shared_ptr<TypedBuffer<T>> {
+    assert(vec.size() == count_);
+    std::ranges::copy(vec, mapped_typed_data_);
+    return this->shared_from_this();
   }
 
 private:

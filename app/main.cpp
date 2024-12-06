@@ -1,23 +1,23 @@
 
-#include <memory>
+#include <numeric>
 #include <spdlog/spdlog.h>
 
-#include "app_data.hpp"
-
+// #include "app_data.hpp"
+#include "cuda/cuda_engine.hpp"
 // #include "cuda/cu_buffer_typed.cuh"
 
 int main() {
+  cuda::Engine engine;
+
   spdlog::set_level(spdlog::level::trace);
 
-  auto buffer = std::make_unique<cuda::TypedBuffer<int>>(1024);
-
-  std::ranges::fill(buffer->begin(), buffer->end(), 1);
+  auto buffer_a = engine.typed_buffer<int>(1024)->random();
+  auto buffer_b = engine.typed_buffer<float>(1024)->zeros();
 
   for (size_t i = 0; i < 10; ++i) {
-    spdlog::info("buffer[{}] = {}", i, buffer->at(i));
+    spdlog::info("buffer_a[{}] = {}", i, buffer_a->at(i));
+    spdlog::info("buffer_b[{}] = {}", i, buffer_b->at(i));
   }
-
-  app::demo::AppData app_data;
 
   return 0;
 }
