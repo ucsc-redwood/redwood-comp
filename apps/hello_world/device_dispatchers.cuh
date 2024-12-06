@@ -4,6 +4,6 @@
 
 namespace cuda {
 
-void run_stage1(const cuda::AppData &app_data);
+void run_stage1(Engine &engine, const cuda::AppData &app_data);
 
-} // namespace cuda
+}  // namespace cuda

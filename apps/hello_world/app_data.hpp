@@ -1,10 +1,11 @@
 #pragma once
 
-#include "redwood/cuda/cuda_engine.hpp"
+#include "redwood/cuda/cuda_engine.cuh"
 
 namespace cuda {
 
-template <typename T> using BufferPtr = std::shared_ptr<TypedBuffer<T>>;
+template <typename T>
+using BufferPtr = std::shared_ptr<TypedBuffer<T>>;
 
 struct AppData {
   explicit AppData(Engine &engine, const size_t n) : n(n) {
@@ -19,4 +20,4 @@ struct AppData {
   BufferPtr<int> output;
 };
 
-} // namespace cuda
+}  // namespace cuda

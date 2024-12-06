@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
 
   // Run the stage 1 of the application
   if (use_cuda) {
-    cuda::run_stage1(app_data);
+    cuda::run_stage1(engine, app_data);
   } else {
     cpu::run_stage1(app_data).wait();
   }
@@ -35,8 +35,6 @@ int main(int argc, char **argv) {
   for (size_t i = 0; i < 10; ++i) {
     spdlog::info("output[{}] = {}", i, app_data.output->at(i));
   }
-
-  cuda::run_stage1(app_data);
 
   return EXIT_SUCCESS;
 }

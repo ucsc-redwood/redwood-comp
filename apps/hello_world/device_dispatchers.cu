@@ -6,27 +6,29 @@
 
 namespace cuda {
 
-void run_stage1(const cuda::AppData &app_data) {
+void run_stage1(Engine &engine, const cuda::AppData &app_data) {
   constexpr dim3 threads_per_block(256);
-  const dim3 blocks((app_data.n + threads_per_block.x - 1) /
-                    threads_per_block.x);
+  const dim3 blocks(div_up(app_data.n, threads_per_block.x));
+  constexpr auto s_mem = 0;
+  const auto stream = engine.stream(0);
 
   spdlog::debug(
       "CUDA kernel 'vector_add', n = {}, threads_per_block = {}, "
-      "blocks = {}",
+      "blocks = {}, on stream: {}",
       app_data.n,
       threads_per_block.x,
-      blocks.x);
+      blocks.x,
+      (void *)stream);
 
-  cuda::kernels::vector_add<<<blocks, threads_per_block, 0>>>(
+  cuda::kernels::vector_add<<<blocks, threads_per_block, s_mem, stream>>>(
       app_data.input_a->data(),
       app_data.input_b->data(),
       app_data.output->data(),
       0,
       app_data.n);
 
-  spdlog::debug("Synchronizing CUDA device");
-  CUDA_CHECK(cudaDeviceSynchronize());
+  spdlog::debug("Synchronizing CUDA stream: {}", (void *)stream);
+  CUDA_CHECK(cudaStreamSynchronize(stream));
 }
 
 }  // namespace cuda
