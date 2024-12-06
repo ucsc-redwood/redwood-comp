@@ -4,7 +4,6 @@
 #include <memory_resource>
 
 #include "redwood/cuda/cu_mem_resource.cuh"
-
 #include "redwood/vulkan/engine.hpp"
 #include "redwood/vulkan/vk_allocator.hpp"
 
@@ -48,7 +47,7 @@ int main(int argc, char** argv) {
   }
 
   // print cuda vectors
-  for (size_t i = 0; i < n; ++i) {
+  for (size_t i = 0; i < 10; ++i) {
     std::cout << v_cuda1[i] << " " << v_cuda2[i] << std::endl;
   }
 
