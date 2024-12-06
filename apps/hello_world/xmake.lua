@@ -19,6 +19,12 @@ target("app-hello")
 
 
     add_deps("cu-backend")
+    
+    -- tmp:
+    add_deps("vk-backend")
+    add_packages("vulkan-hpp", "vulkan-memory-allocator")
+
+
     add_cugencodes("native")
 
 

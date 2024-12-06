@@ -1,60 +1,61 @@
 #include <spdlog/spdlog.h>
 
 #include <CLI/CLI.hpp>
+#include <memory_resource>
 
-// #include "redwood/cuda/cu_buffer.cuh"
-// #include "redwood/host/host_buffer.hpp"
-#include "redwood/cuda/cu_allocator.cuh"
-#include "redwood/host/host_allocator.hpp"
-#include "redwood/uni_engine.hpp"
-
-// template <typename BufferT>
-//   requires std::is_base_of_v<BaseBuffer, BufferT>
-
-template <typename AllocatorT>
-struct AppData {
-  explicit AppData(const size_t n) : n(n), input_a(n), input_b(n), output(n) {
-    std::ranges::fill(input_a, 1.0f);
-    std::ranges::fill(input_b, 2.0f);
-    std::ranges::fill(output, 0.0f);
-  }
-
-  const size_t n;
-  std::vector<float, AllocatorT> input_a;
-  std::vector<float, AllocatorT> input_b;
-  std::vector<float, AllocatorT> output;
-
-  // explicit AppData(UniEngine &eng, const size_t n) : n(n) {
-  //   input_a = eng.buffer<BufferT>(n);
-  //   input_b = eng.buffer<BufferT>(n);
-  //   output = eng.buffer<BufferT>(n);
-  // }
-
-  // const size_t n;
-  // std::shared_ptr<BufferT> input_a;
-  // std::shared_ptr<BufferT> input_b;
-  // std::shared_ptr<BufferT> output;
-};
+#include "redwood/cuda/cu_mem_resource.cuh"
+#include "redwood/vulkan/engine.hpp"
+#include "redwood/vulkan/vk_allocator.hpp"
 
 int main(int argc, char** argv) {
   CLI::App app("Hello World");
 
-  bool use_cuda = false;
-  app.add_flag("--cuda", use_cuda, "Use CUDA");
+  std::string device_id;
+  app.add_option("-d,--device", device_id, "Device ID")->required();
   CLI11_PARSE(app, argc, argv);
 
   spdlog::set_level(spdlog::level::trace);
 
-  // Initialize compute engine and application data
-  UniEngine engine;
+  vulkan::Engine engine;
 
-  AppData<cpu::HostAllocator<float>> app_data(1024);
-  AppData<cuda::CudaAllocator<float>> app_data_cuda(1024);
+  constexpr auto n = 1024;
 
-  // peek 10 elements
-  for (size_t i = 0; i < 10; ++i) {
-    spdlog::info("app_data[{}]: {}", i, app_data.input_a[i]);
+  auto host_mr = std::pmr::new_delete_resource();
+  std::pmr::vector<int> v_cpu1(n, host_mr);
+  std::pmr::vector<int> v_cpu2(n, host_mr);
+
+  CudaMemoryResource cuda_mr;
+  std::pmr::vector<int> v_cuda1(n, &cuda_mr);
+  std::pmr::vector<int> v_cuda2(n, &cuda_mr);
+
+  vulkan::VulkanMemoryResource vk_mr(engine);
+  std::pmr::vector<int> v_vk1(n, &vk_mr);
+
+  vulkan::VulkanMemoryResource vk_mr2(engine);
+  std::pmr::vector<int> v_vk2(n, &vk_mr2);
+
+  std::ranges::fill(v_cpu1, 1);
+  std::ranges::fill(v_cpu2, 2);
+  std::ranges::fill(v_cuda1, 3);
+  std::ranges::fill(v_cuda2, 4);
+  std::ranges::fill(v_vk1, 5);
+  std::ranges::fill(v_vk2, 6);
+
+  // print cpu vectors
+  for (size_t i = 0; i < n; ++i) {
+    std::cout << v_cpu1[i] << " " << v_cpu2[i] << std::endl;
   }
 
+  // print cuda vectors
+  for (size_t i = 0; i < n; ++i) {
+    std::cout << v_cuda1[i] << " " << v_cuda2[i] << std::endl;
+  }
+
+  // print vulkan vectors
+  for (size_t i = 0; i < n; ++i) {
+    std::cout << v_vk1[i] << " " << v_vk2[i] << std::endl;
+  }
+
+  spdlog::info("Done");
   return EXIT_SUCCESS;
 }

@@ -1,19 +1,19 @@
-#pragma once
+// #pragma once
 
-#include "../base_buffer.hpp"
+// #include "../base_buffer.hpp"
 
-namespace cuda {
+// namespace cuda {
 
-class Buffer : public BaseBuffer {
- public:
-  Buffer() = delete;
-  explicit Buffer(const size_t size) : BaseBuffer(size) { allocate(); }
+// class Buffer : public BaseBuffer {
+//  public:
+//   Buffer() = delete;
+//   explicit Buffer(const size_t size) : BaseBuffer(size) { allocate(); }
 
-  ~Buffer() override { free(); }
+//   ~Buffer() override { free(); }
 
- protected:
-  void allocate() override;
-  void free() override;
-};
+//  protected:
+//   void allocate() override;
+//   void free() override;
+// };
 
-}  // namespace cuda
+// }  // namespace cuda

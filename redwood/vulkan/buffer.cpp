@@ -33,9 +33,9 @@ Buffer::Buffer(std::shared_ptr<vk::Device> device_ptr,
 
   vmaCreateBuffer(
       g_vma_allocator,
-      std::bit_cast<const VkBufferCreateInfo *>(&buffer_create_info),
+      reinterpret_cast<const VkBufferCreateInfo *>(&buffer_create_info),
       &memory_info,
-      std::bit_cast<VkBuffer *>(&this->get_handle()),
+      reinterpret_cast<VkBuffer *>(&this->get_handle()),
       &allocation_,
       &allocation_info);
 
