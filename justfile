@@ -6,7 +6,7 @@ set-android-v7a:
     xmake f -p android -a armeabi-v7a --ndk=~/Android/Sdk/ndk/28.0.12433566/ --android_sdk=~/Android/Sdk/ --ndk_sdkver=24 -c
 
 set-jetson:
-    xmake f -p linux -a arm64 -c
+    xmake f -p linux -a arm64 -c --cuda-backend=y -v
 
 set-default:
     xmake f -p linux -a x86_64 -c
