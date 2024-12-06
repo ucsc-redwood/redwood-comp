@@ -5,10 +5,10 @@
 
 #include "../cli_to_config.hpp"
 #include "../read_config.hpp"
-// #include "../globals_vars.hpp"
 #include "app_data.hpp"
 #include "host/host_dispatchers.hpp"
 #include "redwood/backends.hpp"
+#include "redwood/host/thread_pool.hpp"
 
 // forward declare
 void run_cpu_backend_demo(size_t n);
@@ -60,11 +60,13 @@ void run_vulkan_backend_demo(const size_t n) {
 
 #endif
 
-void run_cpu_backend_demo(const size_t n) {
+void run_cpu_backend_demo(const size_t n, const std::vector<int>& small_cores) {
   auto host_mr = std::pmr::new_delete_resource();
   AppData app_data(host_mr, n);
 
-  cpu::run_stage1(app_data).wait();
+  core::thread_pool pool(small_cores);
+  cpu::v2::run_stage1(app_data, pool, small_cores.size()).wait();
+
   print_output(app_data);
 }
 
@@ -86,7 +88,7 @@ int main(int argc, char** argv) {
 
   if constexpr (is_backend_enabled(BackendType::kCPU)) {
     spdlog::info("CPU backend is enabled");
-    run_cpu_backend_demo(n);
+    run_cpu_backend_demo(n, small_cores);
   }
   if constexpr (is_backend_enabled(BackendType::kCUDA)) {
     spdlog::info("CUDA backend is enabled");
