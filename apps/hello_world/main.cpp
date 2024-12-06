@@ -7,6 +7,11 @@
 #include "host/host_dispatchers.hpp"
 #include "redwood/backends.hpp"
 
+// forward declare
+void run_cpu_backend_demo(size_t n);
+void run_cuda_backend_demo(size_t n);
+void run_vulkan_backend_demo(size_t n);
+
 // print the first 10 elements of the output
 void print_output(const AppData& app_data) {
   for (size_t i = 0; i < 10; ++i) {
