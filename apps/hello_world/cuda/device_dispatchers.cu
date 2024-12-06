@@ -13,7 +13,8 @@
 //   const auto stream = engine.stream(0);
 
 //   spdlog::debug(
-//       "CUDA kernel 'vector_add', n = {}, threads = {}, blocks = {}, on stream: "
+//       "CUDA kernel 'vector_add', n = {}, threads = {}, blocks = {}, on
+//       stream: "
 //       "{}",
 //       app_data.n,
 //       threads,

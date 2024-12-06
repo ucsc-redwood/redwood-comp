@@ -1,3 +1,12 @@
+
+option("cuda-backend")
+    set_default(false)
+    set_showmenu(true)
+    set_description("Enable CUDA backend")
+option_end()
+
+if has_config("cuda-backend") then
+
 set_policy("build.cuda.devlink", true)
 
 target("cu-backend")
@@ -6,3 +15,5 @@ target("cu-backend")
     add_files("*.cu")
     add_packages("spdlog")
 target_end()
+
+end

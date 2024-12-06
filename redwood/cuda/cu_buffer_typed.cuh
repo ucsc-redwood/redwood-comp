@@ -12,7 +12,8 @@
 
 // template <typename T>
 // class TypedBuffer final : public Buffer,
-//                           public std::enable_shared_from_this<TypedBuffer<T>> {
+//                           public std::enable_shared_from_this<TypedBuffer<T>>
+//                           {
 //  public:
 //   // Add iterator type aliases
 //   using value_type = T;
@@ -28,7 +29,8 @@
 //   TypedBuffer() = delete;
 
 //   explicit TypedBuffer(const size_t count)
-//       : Buffer(count * sizeof(T)), mapped_typed_data_(data()), count_(count) {}
+//       : Buffer(count * sizeof(T)), mapped_typed_data_(data()), count_(count)
+//       {}
 
 //   // Prevent copying, allow moving
 //   TypedBuffer(const TypedBuffer &) = delete;
@@ -60,16 +62,20 @@
 //     return reinterpret_cast<const T *>(mapped_data_);
 //   }
 
-//   [[nodiscard]] T &at(const size_t index) { return mapped_typed_data_[index]; }
+//   [[nodiscard]] T &at(const size_t index) { return mapped_typed_data_[index];
+//   }
 //   [[nodiscard]] const T &at(const size_t index) const {
 //     return mapped_typed_data_[index];
 //   }
 
-//   // --------------------------------------------------------------------------
+//   //
+//   --------------------------------------------------------------------------
 //   // Helper functions to quickly fill the buffer as you construct it
-//   // --------------------------------------------------------------------------
+//   //
+//   --------------------------------------------------------------------------
 
-//   [[nodiscard]] auto fill(const T &value) -> std::shared_ptr<TypedBuffer<T>> {
+//   [[nodiscard]] auto fill(const T &value) -> std::shared_ptr<TypedBuffer<T>>
+//   {
 //     std::ranges::fill(*this, value);
 //     return this->shared_from_this();
 //   }
@@ -103,7 +109,8 @@
 //       std::ranges::generate(*this, [&]() { return dis(gen); });
 //     } else {
 //       static_assert(std::floating_point<T> || std::integral<T>,
-//                     "random() only supports floating point or integral types");
+//                     "random() only supports floating point or integral
+//                     types");
 //     }
 //     return this->shared_from_this();
 //   }
