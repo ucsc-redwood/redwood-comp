@@ -6,7 +6,7 @@ layout(push_constant) uniform Params { uint n; }
 params;
 
 layout(std430, set = 0, binding = 0) readonly buffer InputA {
-  float input_a[];
+  float u_input_a[];
 };
 
 layout(std430, set = 0, binding = 1) readonly buffer InputB {

@@ -20,6 +20,8 @@ target("app-hello")
     -- Android related (optional)
     if has_config("vulkan-backend") then
       add_defines("REDWOOD_VULKAN_BACKEND")
+      add_headerfiles("vulkan/*.hpp")
+      add_files("vulkan/*.cpp")
 
       if is_plat("android") then
         on_run(run_on_android)

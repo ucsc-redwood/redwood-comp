@@ -1,5 +1,8 @@
 add_requires("vulkan-hpp", "vulkan-memory-allocator")
 
+-- glsl compiler and reflection
+add_requires("shaderc", "spirv-reflect")
+
 option("vulkan-backend")
     set_default(false)
     set_showmenu(true)
@@ -13,6 +16,7 @@ target("vk-backend")
     add_headerfiles("*.hpp")
     add_files("*.cpp")
     add_packages("vulkan-hpp", "vulkan-memory-allocator")
+    add_packages("shaderc", "spirv-reflect")
     add_packages("spdlog")
 target_end()
 

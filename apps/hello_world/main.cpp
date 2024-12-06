@@ -36,10 +36,15 @@ void run_cuda_backend_demo(const size_t n) {
 #ifdef REDWOOD_VULKAN_BACKEND
 
 #include "redwood/vulkan/vk_allocator.hpp"
+#include "vulkan/vk_dispatchers.hpp"
 
 void run_vulkan_backend_demo(const size_t n) {
-  vulkan::VulkanMemoryResource vk_mr;
+  vulkan::Engine engine;
+  vulkan::VulkanMemoryResource vk_mr(engine);
   AppData app_data(n, &vk_mr);
+
+  vulkan::run_stage1(engine, app_data);
+  print_output(app_data);
 }
 
 #endif
