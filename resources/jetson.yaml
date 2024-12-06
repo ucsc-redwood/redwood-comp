@@ -19,9 +19,9 @@ cpu_info:
       pinnable: true
     - id: 4
       max_frequency: 1510
-      type: small
+      type: big
       pinnable: true
     - id: 5
       max_frequency: 1510
-      type: small
+      type: big
       pinnable: true
