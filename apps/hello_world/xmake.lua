@@ -1,30 +1,23 @@
-local headerfiles = {
-  "*.hpp",
-  -- "cuda/*.cuh",
-}
-
-local sources = {
-  "host_kernels.cpp",
-}
 
 add_requires("cli11")
 
 target("app-hello")
     set_kind("binary")
     add_includedirs("$(projectdir)")
-    add_headerfiles(headerfiles)
+    add_headerfiles("*.hpp")
     add_files("main.cpp", "host_kernels.cpp")
     add_packages("spdlog", "cli11")
 
+    -- CUDA related (optional)
+    add_deps("cu-backend")
+    add_headerfiles("cuda/*.cuh")
+    add_files("cuda/*.cu")
+    add_cugencodes("native")
 
-    -- add_deps("cu-backend")
-    -- add_cugencodes("native")
-
+    -- Android related (optional)
     if is_plat("android") then
       on_run(run_on_android)
     end
-
-    -- tmp:
     add_deps("vk-backend")
     add_packages("vulkan-hpp", "vulkan-memory-allocator")
 
