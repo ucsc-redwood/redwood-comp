@@ -1,0 +1,60 @@
+# Google Pixel 7
+cpu_info:
+  total_cores: 8
+  cores:
+    - id: 0
+      max_frequency: 1803
+      type: small
+      pinnable: true
+    - id: 1
+      max_frequency: 1803
+      type: small
+      pinnable: true
+    - id: 2
+      max_frequency: 1803
+      type: small
+      pinnable: true
+    - id: 3
+      max_frequency: 1803
+      type: small
+      pinnable: true
+    - id: 4
+      max_frequency: 2348
+      type: medium
+      pinnable: true
+    - id: 5
+      max_frequency: 2348
+      type: medium
+      pinnable: true
+    - id: 6
+      max_frequency: 2850
+      type: big
+      pinnable: true
+    - id: 7
+      max_frequency: 2850
+      type: big
+      pinnable: true
+# workloads:
+#   - name: Workload1
+#     core_allocation:
+#       tasks:
+#         - name: CPU_Stage1_MT
+#           allocated_cores: [0, 1]
+#         - name: CPU_Stage2_MT
+#           allocated_cores: [2, 3]
+#         - name: CPU_Stage3_MT
+#           allocated_cores: [4]
+#         - name: CPU_Stage4_MT
+#           allocated_cores: [5]
+
+#   - name: Workload2
+#     core_allocation:
+#       tasks:
+#         - name: CPU_Stage1_MT
+#           allocated_cores: [1, 2]
+#         - name: CPU_Stage2_MT
+#           allocated_cores: [3]
+#         - name: CPU_Stage3_MT
+#           allocated_cores: [4, 5]
+#         - name: CPU_Stage4_MT
+#           allocated_cores: [0]

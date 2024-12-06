@@ -1,0 +1,36 @@
+# While my PC has 32 cores, only use 8 for now, use 4 small cores and 4 big cores
+cpu_info:
+  total_cores: 8
+  cores:
+    - id: 0
+      max_frequency: 6100
+      type: big
+      pinnable: true
+    - id: 1
+      max_frequency: 6100
+      type: big
+      pinnable: true
+    - id: 8
+      max_frequency: 6100
+      type: big
+      pinnable: true
+    - id: 9
+      max_frequency: 6100
+      type: big
+      pinnable: true
+    - id: 17
+      max_frequency: 4600
+      type: small
+      pinnable: true
+    - id: 18
+      max_frequency: 4600
+      type: small
+      pinnable: true
+    - id: 19
+      max_frequency: 4600
+      type: small
+      pinnable: true
+    - id: 20
+      max_frequency: 4600
+      type: small
+      pinnable: true
