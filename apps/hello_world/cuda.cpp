@@ -8,12 +8,12 @@
 #include "host_dispatchers.hpp"
 
 int main(int argc, char **argv) {
-  bool use_cuda = false;
-
-  // Initialize Demo application
   CLI::App app("Hello World");
+
+  bool use_cuda = false;
   app.add_flag("--cuda", use_cuda, "Use CUDA");
   CLI11_PARSE(app, argc, argv);
+
   spdlog::set_level(spdlog::level::trace);
 
   // Initialize compute engine and application data
@@ -27,6 +27,7 @@ int main(int argc, char **argv) {
   // Run the stage 1 of the application
   if (use_cuda) {
     cuda::run_stage1(engine, app_data);
+    engine.sync();
   } else {
     cpu::run_stage1(app_data).wait();
   }

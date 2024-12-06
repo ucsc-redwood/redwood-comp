@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "cu_buffer_typed.cuh"
+#include "helpers.cuh"
 
 namespace cuda {
 
@@ -28,6 +29,18 @@ class Engine {
 
   [[nodiscard]] cudaStream_t stream(const size_t i) const {
     return streams_[i];
+  }
+
+  void sync(const cudaStream_t stream) const {
+    spdlog::debug("Synchronizing CUDA stream: {}",
+                  reinterpret_cast<void *>(stream));
+    CUDA_CHECK(cudaStreamSynchronize(stream));
+  }
+
+  void sync() const {
+    for (const auto &stream : streams_) {
+      sync(stream);
+    }
   }
 
  private:

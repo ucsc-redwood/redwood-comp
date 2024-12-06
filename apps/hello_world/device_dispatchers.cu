@@ -18,7 +18,7 @@ void run_stage1(Engine &engine, const cuda::AppData &app_data) {
       app_data.n,
       threads_per_block.x,
       blocks.x,
-      (void *)stream);
+      reinterpret_cast<void *>(stream));
 
   cuda::kernels::vector_add<<<blocks, threads_per_block, s_mem, stream>>>(
       app_data.input_a->data(),
@@ -27,8 +27,9 @@ void run_stage1(Engine &engine, const cuda::AppData &app_data) {
       0,
       app_data.n);
 
-  spdlog::debug("Synchronizing CUDA stream: {}", (void *)stream);
-  CUDA_CHECK(cudaStreamSynchronize(stream));
+  // spdlog::debug("Synchronizing CUDA stream: {}",
+  //               reinterpret_cast<void *>(stream));
+  // CUDA_CHECK(cudaStreamSynchronize(stream));
 }
 
 }  // namespace cuda
