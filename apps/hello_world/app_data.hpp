@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <memory_resource>
+#include <vector>
 
 template <typename T>
 using UsmVector = std::pmr::vector<T>;
