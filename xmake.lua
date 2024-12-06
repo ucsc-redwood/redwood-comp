@@ -8,7 +8,7 @@ add_requires("spdlog")
 
 includes("android.lua")
 
--- includes("redwood/cuda")
+includes("redwood/cuda")
 includes("redwood/vulkan")
 
 includes("apps/hello_world")
