@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <memory>
+#include <memory_resource>
 
 // a dispatcher is a singleton that allows you to dispatch any kernel to any
 // data, and provide synchronization points.
