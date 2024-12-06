@@ -4,9 +4,9 @@ namespace cpu {
 
 namespace kernels {
 
-void vector_add(const int *input_a,
-                const int *input_b,
-                int *output,
+void vector_add(const float *input_a,
+                const float *input_b,
+                float *output,
                 const size_t start,
                 const size_t end) {
   for (size_t i = start; i < end; ++i) {

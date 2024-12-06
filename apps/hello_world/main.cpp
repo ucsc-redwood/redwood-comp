@@ -4,6 +4,14 @@
 #include <memory_resource>
 
 #include "app_data.hpp"
+#include "host/host_dispatchers.hpp"
+
+void print_output(const AppData& app_data) {
+  // print the first 10 elements of the output
+  for (size_t i = 0; i < 10; ++i) {
+    spdlog::info("output[{}] = {}", i, app_data.u_output[i]);
+  }
+}
 
 #ifdef REDWOOD_CUDA_BACKEND
 
@@ -30,6 +38,9 @@ void run_vulkan_backend_demo(const size_t n) {
 void run_cpu_backend_demo(const size_t n) {
   auto host_mr = std::pmr::new_delete_resource();
   AppData app_data(n, host_mr);
+
+  cpu::run_stage1(app_data).wait();
+  print_output(app_data);
 }
 
 enum class BackendType { kCPU, kCUDA, kVulkan };
