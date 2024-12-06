@@ -10,12 +10,14 @@ set_policy("build.cuda.devlink", true)
 
 target("cu-backend")
     set_kind("static")
-    add_headerfiles("app/cuda/*.cuh")
-    add_files("app/cuda/*.cu")
+    add_headerfiles("redwood/cuda/*.cuh")
+    add_files("redwood/cuda/*.cu")
     add_packages("spdlog")
 
 target("app")
     set_kind("binary")
-    add_files("app/main.cpp")
+    add_includedirs("$(projectdir)")
+    add_files("apps/hello_world/cuda.cpp")
     add_packages("spdlog")
     add_deps("cu-backend")
+

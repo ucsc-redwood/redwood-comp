@@ -2,9 +2,7 @@
 #include <numeric>
 #include <spdlog/spdlog.h>
 
-// #include "app_data.hpp"
-#include "cuda/cuda_engine.hpp"
-// #include "cuda/cu_buffer_typed.cuh"
+#include "../redwood/cuda/cuda_engine.hpp"
 
 int main() {
   cuda::Engine engine;
