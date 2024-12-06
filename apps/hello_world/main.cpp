@@ -5,9 +5,10 @@
 
 #include "app_data.hpp"
 #include "host/host_dispatchers.hpp"
+#include "redwood/backends.hpp"
 
+// print the first 10 elements of the output
 void print_output(const AppData& app_data) {
-  // print the first 10 elements of the output
   for (size_t i = 0; i < 10; ++i) {
     spdlog::info("output[{}] = {}", i, app_data.u_output[i]);
   }
@@ -15,11 +16,14 @@ void print_output(const AppData& app_data) {
 
 #ifdef REDWOOD_CUDA_BACKEND
 
+#include "cuda/device_dispatchers.cuh"
 #include "redwood/cuda/cu_mem_resource.cuh"
 
 void run_cuda_backend_demo(const size_t n) {
   cuda::CudaMemoryResource cuda_mr;
   AppData app_data(n, &cuda_mr);
+  cuda::run_stage1(app_data);
+  print_output(app_data);
 }
 
 #endif
@@ -43,10 +47,6 @@ void run_cpu_backend_demo(const size_t n) {
   print_output(app_data);
 }
 
-enum class BackendType { kCPU, kCUDA, kVulkan };
-
-constexpr BackendType kBackendType = BackendType::kCUDA;
-
 int main(int argc, char** argv) {
   CLI::App app("Hello World");
 
@@ -58,15 +58,18 @@ int main(int argc, char** argv) {
 
   constexpr auto n = 1024;
 
-  run_cpu_backend_demo(n);
-
-#ifdef REDWOOD_CUDA_BACKEND
-  run_cuda_backend_demo(n);
-#endif
-
-#ifdef REDWOOD_VULKAN_BACKEND
-  run_vulkan_backend_demo(n);
-#endif
+  if constexpr (is_backend_enabled(BackendType::kCPU)) {
+    spdlog::info("CPU backend is enabled");
+    run_cpu_backend_demo(n);
+  }
+  if constexpr (is_backend_enabled(BackendType::kCUDA)) {
+    spdlog::info("CUDA backend is enabled");
+    run_cuda_backend_demo(n);
+  }
+  if constexpr (is_backend_enabled(BackendType::kVulkan)) {
+    spdlog::info("Vulkan backend is enabled");
+    run_vulkan_backend_demo(n);
+  }
 
   spdlog::info("Done");
   return EXIT_SUCCESS;
