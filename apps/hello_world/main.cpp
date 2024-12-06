@@ -3,7 +3,8 @@
 #include <CLI/CLI.hpp>
 #include <memory_resource>
 
-#include "redwood/cuda/cu_mem_resource.cuh"
+// #include "redwood/cuda/cu_mem_resource.cuh"
+
 #include "redwood/vulkan/engine.hpp"
 #include "redwood/vulkan/vk_allocator.hpp"
 
@@ -24,9 +25,9 @@ int main(int argc, char** argv) {
   std::pmr::vector<int> v_cpu1(n, host_mr);
   std::pmr::vector<int> v_cpu2(n, host_mr);
 
-  CudaMemoryResource cuda_mr;
-  std::pmr::vector<int> v_cuda1(n, &cuda_mr);
-  std::pmr::vector<int> v_cuda2(n, &cuda_mr);
+  // CudaMemoryResource cuda_mr;
+  // std::pmr::vector<int> v_cuda1(n, &cuda_mr);
+  // std::pmr::vector<int> v_cuda2(n, &cuda_mr);
 
   vulkan::VulkanMemoryResource vk_mr(engine);
   std::pmr::vector<int> v_vk1(n, &vk_mr);
@@ -36,8 +37,8 @@ int main(int argc, char** argv) {
 
   std::ranges::fill(v_cpu1, 1);
   std::ranges::fill(v_cpu2, 2);
-  std::ranges::fill(v_cuda1, 3);
-  std::ranges::fill(v_cuda2, 4);
+      // std::ranges::fill(v_cuda1, 3);
+      // std::ranges::fill(v_cuda2, 4);
   std::ranges::fill(v_vk1, 5);
   std::ranges::fill(v_vk2, 6);
 
@@ -46,10 +47,10 @@ int main(int argc, char** argv) {
     std::cout << v_cpu1[i] << " " << v_cpu2[i] << std::endl;
   }
 
-  // print cuda vectors
-  for (size_t i = 0; i < n; ++i) {
-    std::cout << v_cuda1[i] << " " << v_cuda2[i] << std::endl;
-  }
+  // // print cuda vectors
+  // for (size_t i = 0; i < n; ++i) {
+  //   std::cout << v_cuda1[i] << " " << v_cuda2[i] << std::endl;
+  // }
 
   // print vulkan vectors
   for (size_t i = 0; i < n; ++i) {
