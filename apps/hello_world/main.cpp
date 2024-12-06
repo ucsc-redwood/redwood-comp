@@ -4,7 +4,7 @@
 #include <algorithm>
 
 #include "app_data.hpp"
-#include "device_dispatchers.cuh"
+#include "cuda/device_dispatchers.cuh"
 #include "host_dispatchers.hpp"
 
 int main(int argc, char **argv) {
@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
   // Initialize compute engine and application data
   cuda::Engine engine;
 
-  cuda::AppData app_data(engine, 1024);
+  AppData app_data(engine, 1024);
 
   // Run the stage 1 of the application
   if (use_cuda) {

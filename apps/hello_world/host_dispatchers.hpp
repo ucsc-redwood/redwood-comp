@@ -7,8 +7,7 @@
 
 namespace cpu {
 
-[[nodiscard]] inline std::future<void> run_stage1(
-    const cuda::AppData &app_data) {
+[[nodiscard]] inline std::future<void> run_stage1(const AppData &app_data) {
   spdlog::debug("CPU kernel 'vector_add', n = {}", app_data.n);
 
   return std::async(std::launch::async, [&]() {

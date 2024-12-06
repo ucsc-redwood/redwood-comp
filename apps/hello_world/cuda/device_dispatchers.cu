@@ -6,7 +6,7 @@
 
 namespace cuda {
 
-void run_stage1(Engine &engine, const cuda::AppData &app_data) {
+void run_stage1(cuda::Engine &engine, const AppData &app_data) {
   constexpr auto threads = 256;
   const auto blocks = div_up(app_data.n, threads);
   constexpr auto s_mem = 0;
