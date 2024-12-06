@@ -1,15 +1,22 @@
-#include "redwood/cuda/cuda_engine.hpp"
-
+#include "app_data.hpp"
 #include <spdlog/spdlog.h>
+
+#include <algorithm>
 
 int main() {
   spdlog::set_level(spdlog::level::trace);
 
   cuda::Engine engine;
 
-  auto input_a = engine.typed_buffer<int>(1024);
-  auto input_b = engine.typed_buffer<int>(1024);
-  auto output = engine.typed_buffer<int>(1024);
+  cuda::AppData app_data(engine, 1024);
+
+  std::ranges::fill(*app_data.input_a, 1);
+  std::ranges::fill(*app_data.input_b, 2);
+
+  // print the first 10 elements of output
+  for (size_t i = 0; i < 10; ++i) {
+    spdlog::info("output[{}] = {}", i, app_data.output->at(i));
+  }
 
   return EXIT_SUCCESS;
 }

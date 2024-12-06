@@ -14,10 +14,4 @@ target("cu-backend")
     add_files("redwood/cuda/*.cu")
     add_packages("spdlog")
 
-target("app")
-    set_kind("binary")
-    add_includedirs("$(projectdir)")
-    add_files("apps/hello_world/cuda.cpp")
-    add_packages("spdlog")
-    add_deps("cu-backend")
-
+includes("apps/hello_world")
