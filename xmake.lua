@@ -6,7 +6,6 @@ set_warnings("allextra")
 -- Global requirements
 add_requires("spdlog")
 
-
 includes("redwood/cuda")
 includes("redwood/vulkan")
 
