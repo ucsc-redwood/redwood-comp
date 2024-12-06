@@ -6,7 +6,8 @@ target("app-hello")
     add_includedirs("$(projectdir)")
     add_headerfiles("*.hpp", "host/*.hpp")
     add_files("main.cpp", "host/*.cpp")
-    add_packages("spdlog", "cli11")
+    add_packages("spdlog", "cli11", "yaml-cpp")
+    add_deps("cpu-backend")
 
     -- CUDA related (optional)
     if has_config("cuda-backend") then

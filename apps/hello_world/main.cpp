@@ -3,6 +3,9 @@
 #include <CLI/CLI.hpp>
 #include <memory_resource>
 
+#include "../cli_to_config.hpp"
+#include "../read_config.hpp"
+// #include "../globals_vars.hpp"
 #include "app_data.hpp"
 #include "host/host_dispatchers.hpp"
 #include "redwood/backends.hpp"
@@ -66,11 +69,16 @@ void run_cpu_backend_demo(const size_t n) {
 }
 
 int main(int argc, char** argv) {
-  CLI::App app("Hello World");
+  auto config = helpers::init_demo(argc, argv);
+  auto small_cores = helpers::get_cores_by_type(config["cpu_info"], "small");
+  auto medium_cores = helpers::get_cores_by_type(config["cpu_info"], "medium");
+  auto big_cores = helpers::get_cores_by_type(config["cpu_info"], "big");
 
-  std::string device_id;
-  app.add_option("-d,--device", device_id, "Device ID")->required();
-  CLI11_PARSE(app, argc, argv);
+  assert(!small_cores.empty());
+
+  spdlog::info("Small cores: [{}]", fmt::join(small_cores, ", "));
+  spdlog::info("Medium cores: [{}]", fmt::join(medium_cores, ", "));
+  spdlog::info("Big cores: [{}]", fmt::join(big_cores, ", "));
 
   spdlog::set_level(spdlog::level::trace);
 
