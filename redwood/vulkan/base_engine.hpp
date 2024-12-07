@@ -106,8 +106,7 @@ class BaseEngine {
   uint32_t compute_queue_family_index_ = std::numeric_limits<uint32_t>::max();
 
  private:
-  vk::DynamicLoader dl_;
-  // vk::detail::DynamicLoader dl_;
+  vk::detail::DynamicLoader dl_;
 
   PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr_;
   PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr_;
