@@ -17,13 +17,13 @@ namespace vulkan {
 // Constructor
 // ----------------------------------------------------------------------------
 
-Algorithm::Algorithm(
-    // vk::Device device,
-    VulkanMemoryResource& mr,
+Algorithm::Algorithm(  // VulkanMemoryResource& mr,
+                       // std::shared_ptr<VulkanMemoryResource> mr_ptr,
+    VulkanMemoryResource* mr_ptr,
     const std::string_view shader_path,
     const std::vector<vk::Buffer>& buffers)
-    : device_ref_(mr.get_device()),
-      mr_ref_(mr),
+    : device_ref_(mr_ptr->get_device()),
+      mr_ptr_(mr_ptr),
       shader_path_(shader_path),
       usm_buffers_(buffers) {
   SPDLOG_TRACE("Algorithm constructor");
@@ -373,7 +373,8 @@ void Algorithm::update_descriptor_sets(const std::vector<vk::Buffer>& buffers) {
   for (uint32_t i = 0; i < buffers.size(); ++i) {
     // buffer_infos.emplace_back(buffers[i].get_descriptor_buffer_info());
 
-    buffer_infos.emplace_back(mr_ref_.make_descriptor_buffer_info(buffers[i]));
+    // buffer_infos.emplace_back(mr_ref_.make_descriptor_buffer_info(buffers[i]));
+    buffer_infos.emplace_back(mr_ptr_->make_descriptor_buffer_info(buffers[i]));
 
     compute_write_descriptor_sets.emplace_back(vk::WriteDescriptorSet{
         .dstSet = descriptor_set_,

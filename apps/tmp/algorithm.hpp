@@ -14,11 +14,11 @@ namespace vulkan {
 
 class Algorithm final : public std::enable_shared_from_this<Algorithm> {
  public:
-  explicit Algorithm(
-    // vk::Device device,
-                     VulkanMemoryResource& mr,
-                     const std::string_view shader_path,
-                     const std::vector<vk::Buffer>& buffers);
+  explicit Algorithm(  // VulkanMemoryResource& mr,
+                       // std::shared_ptr<VulkanMemoryResource> mr_ptr,
+      VulkanMemoryResource* mr_ptr,
+      const std::string_view shader_path,
+      const std::vector<vk::Buffer>& buffers);
 
   ~Algorithm() { destroy(); }
 
@@ -87,7 +87,9 @@ class Algorithm final : public std::enable_shared_from_this<Algorithm> {
 
   // References
   vk::Device device_ref_;
-  VulkanMemoryResource& mr_ref_;
+  // VulkanMemoryResource& mr_ref_;
+  // std::shared_ptr<VulkanMemoryResource> mr_ptr_;
+  VulkanMemoryResource* mr_ptr_;
 
   // Core vulkan handles
   vk::ShaderModule shader_module_ = nullptr;

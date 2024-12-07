@@ -33,7 +33,7 @@ vk::Buffer VulkanMemoryResource::get_buffer_from_pointer(void *p) {
 }
 
 vk::DescriptorBufferInfo VulkanMemoryResource::make_descriptor_buffer_info(
-    vk::Buffer buffer) {
+    vk::Buffer buffer) const {
   // Get the buffer memory requirements to determine its size
   vk::BufferMemoryRequirementsInfo2 req_info{.buffer = buffer};
   vk::MemoryRequirements2 mem_reqs =
