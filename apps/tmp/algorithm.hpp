@@ -14,7 +14,8 @@ namespace vulkan {
 
 class Algorithm final : public std::enable_shared_from_this<Algorithm> {
  public:
-  explicit Algorithm(vk::Device device,
+  explicit Algorithm(
+    // vk::Device device,
                      VulkanMemoryResource& mr,
                      const std::string_view shader_path,
                      const std::vector<vk::Buffer>& buffers);

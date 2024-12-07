@@ -34,7 +34,6 @@ int main() {
   };
 
   auto algo = std::make_shared<vulkan::Algorithm>(
-                  engine.get_device(),
                   mr,
                   "hello_vector_add.comp",
                   std::vector{vec1_buffer, vec2_buffer, vec3_buffer})

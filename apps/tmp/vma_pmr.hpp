@@ -54,6 +54,9 @@ class VulkanMemoryResource : public std::pmr::memory_resource {
   ~VulkanMemoryResource();
 
   [[nodiscard]]
+  vk::Device get_device() const { return device_; }
+
+  [[nodiscard]]
   vk::Buffer get_buffer_from_pointer(void *p);
 
   // [[nodiscard]]

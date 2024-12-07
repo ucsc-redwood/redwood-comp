@@ -32,35 +32,32 @@ vk::Buffer VulkanMemoryResource::get_buffer_from_pointer(void *p) {
   return vk::Buffer(it->second.buffer);
 }
 
-
 vk::DescriptorBufferInfo VulkanMemoryResource::make_descriptor_buffer_info(
     vk::Buffer buffer) {
   // Get the buffer memory requirements to determine its size
   vk::BufferMemoryRequirementsInfo2 req_info{.buffer = buffer};
-  vk::MemoryRequirements2 mem_reqs = device_.getBufferMemoryRequirements2(req_info);
-  
+  vk::MemoryRequirements2 mem_reqs =
+      device_.getBufferMemoryRequirements2(req_info);
+
   return vk::DescriptorBufferInfo{
-      .buffer = buffer,
-      .offset = 0,
-      .range = mem_reqs.memoryRequirements.size
-  };
+      .buffer = buffer, .offset = 0, .range = mem_reqs.memoryRequirements.size};
 }
-
-
 
 // vk::DescriptorBufferInfo VulkanMemoryResource::get_descriptor_buffer_info(
 //     void *p) {
 //   std::lock_guard<std::mutex> lock(mutex_);
 //   auto it = allocations_.find(p);
 //   if (it == allocations_.end()) {
-//     throw std::runtime_error("Unknown pointer in get_descriptor_buffer_info");
+//     throw std::runtime_error("Unknown pointer in
+//     get_descriptor_buffer_info");
 //   }
 
 //   const auto &record = it->second;
 //   vk::Buffer buffer(record.buffer);
 //   vk::DeviceSize size = record.allocInfo.size;
 
-//   return vk::DescriptorBufferInfo{.buffer = buffer, .offset = 0, .range = size};
+//   return vk::DescriptorBufferInfo{.buffer = buffer, .offset = 0, .range =
+//   size};
 // }
 
 void *VulkanMemoryResource::do_allocate(

@@ -17,11 +17,12 @@ namespace vulkan {
 // Constructor
 // ----------------------------------------------------------------------------
 
-Algorithm::Algorithm(vk::Device device,
-                     VulkanMemoryResource& mr,
-                     const std::string_view shader_path,
-                     const std::vector<vk::Buffer>& buffers)
-    : device_ref_(device),
+Algorithm::Algorithm(
+    // vk::Device device,
+    VulkanMemoryResource& mr,
+    const std::string_view shader_path,
+    const std::vector<vk::Buffer>& buffers)
+    : device_ref_(mr.get_device()),
       mr_ref_(mr),
       shader_path_(shader_path),
       usm_buffers_(buffers) {
