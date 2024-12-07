@@ -93,16 +93,11 @@ int main(int argc, char** argv) {
   //   run_vulkan_demo();
   // }
 
-
   vulkan::Engine engine;
 
-    vulkan::VulkanMemoryResource vk_mr(engine);
-    AppData app_data(&vk_mr);
-    vulkan::run_stage1(engine, app_data);
-  
-
-
-
+  vulkan::VulkanMemoryResource vk_mr(engine);
+  AppData app_data(&vk_mr);
+  vulkan::run_stage1(engine, app_data);
 
   spdlog::info("Done");
   return EXIT_SUCCESS;

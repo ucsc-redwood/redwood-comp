@@ -4,12 +4,16 @@ VulkanMemoryResource::VulkanMemoryResource(vk::Device device,
                                            vk::BufferUsageFlags buffer_usage,
                                            VmaMemoryUsage memory_usage,
                                            VmaAllocationCreateFlags flags)
-    : device_(device), bufferUsage_(buffer_usage), memoryUsage_(memory_usage),
+    : device_(device),
+      bufferUsage_(buffer_usage),
+      memoryUsage_(memory_usage),
       allocationFlags_(flags) {
-  SPDLOG_DEBUG("VulkanMemoryResource created with usageFlags = {}, "
-               "memoryUsage = {}, allocFlags = {}",
-               (VkBufferUsageFlags)bufferUsage_, (int)memoryUsage_,
-               (int)allocationFlags_);
+  SPDLOG_DEBUG(
+      "VulkanMemoryResource created with usageFlags = {}, "
+      "memoryUsage = {}, allocFlags = {}",
+      (VkBufferUsageFlags)bufferUsage_,
+      (int)memoryUsage_,
+      (int)allocationFlags_);
 }
 
 VulkanMemoryResource::~VulkanMemoryResource() {
@@ -28,8 +32,8 @@ vk::Buffer VulkanMemoryResource::get_buffer_from_pointer(void *p) {
   return vk::Buffer(it->second.buffer);
 }
 
-vk::DescriptorBufferInfo
-VulkanMemoryResource::get_descriptor_buffer_info(void *p) {
+vk::DescriptorBufferInfo VulkanMemoryResource::get_descriptor_buffer_info(
+    void *p) {
   std::lock_guard<std::mutex> lock(mutex_);
   auto it = allocations_.find(p);
   if (it == allocations_.end()) {
@@ -43,9 +47,8 @@ VulkanMemoryResource::get_descriptor_buffer_info(void *p) {
   return vk::DescriptorBufferInfo{.buffer = buffer, .offset = 0, .range = size};
 }
 
-void *
-VulkanMemoryResource::do_allocate(std::size_t bytes,
-                                  [[maybe_unused]] std::size_t alignment) {
+void *VulkanMemoryResource::do_allocate(
+    std::size_t bytes, [[maybe_unused]] std::size_t alignment) {
   SPDLOG_TRACE("VulkanMemoryResource::do_allocate({}, {})", bytes, alignment);
 
   const vk::BufferCreateInfo buffer_create_info{
@@ -64,7 +67,10 @@ VulkanMemoryResource::do_allocate(std::size_t bytes,
   VkResult res = vmaCreateBuffer(
       g_vma_allocator,
       reinterpret_cast<const VkBufferCreateInfo *>(&buffer_create_info),
-      &allocCreateInfo, &buffer, &allocation, &allocInfo);
+      &allocCreateInfo,
+      &buffer,
+      &allocation,
+      &allocInfo);
 
   CHECK_VK_RESULT(res, "Failed to create VMA buffer");
 
@@ -89,18 +95,20 @@ VulkanMemoryResource::do_allocate(std::size_t bytes,
 
 // Deallocate the buffer by looking up our record.
 void VulkanMemoryResource::do_deallocate(
-    void *p, [[maybe_unused]] std::size_t bytes,
+    void *p,
+    [[maybe_unused]] std::size_t bytes,
     [[maybe_unused]] std::size_t alignment) {
-  SPDLOG_TRACE("VulkanMemoryResource::do_deallocate({}, {}, {})", p, bytes,
-               alignment);
+  SPDLOG_TRACE(
+      "VulkanMemoryResource::do_deallocate({}, {}, {})", p, bytes, alignment);
 
   VulkanAllocationRecord record;
   {
     std::lock_guard<std::mutex> lock(mutex_);
     auto it = allocations_.find(p);
     if (it == allocations_.end()) {
-      SPDLOG_ERROR("Attempted to deallocate unknown pointer from "
-                   "VulkanMemoryResource");
+      SPDLOG_ERROR(
+          "Attempted to deallocate unknown pointer from "
+          "VulkanMemoryResource");
       throw std::runtime_error(
           "Unknown pointer in VulkanMemoryResource::do_deallocate");
     }

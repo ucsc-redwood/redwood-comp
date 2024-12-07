@@ -1,4 +1,7 @@
-add_requires("vulkan-hpp", "vulkan-memory-allocator")
+-- add_requires("vulkan-hpp", "vulkan-memory-allocator")
+
+add_requires("vulkan-hpp 1.3.290")
+add_requires("vulkan-memory-allocator")
 
 -- glsl compiler and reflection
 add_requires("shaderc", "spirv-reflect")

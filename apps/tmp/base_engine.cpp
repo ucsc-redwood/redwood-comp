@@ -53,8 +53,8 @@ void BaseEngine::destroy() const {
 void BaseEngine::initialize_dynamic_loader() {
   SPDLOG_TRACE("BaseEngine::initialize_dynamic_loader");
 
-  // vk::detail::DynamicLoader dl;
-  dl_ = vk::detail::DynamicLoader();
+  // dl_ = vk::detail::DynamicLoader();
+  dl_ = vk::DynamicLoader();
 
   // Load the Vulkan library
   vkGetInstanceProcAddr_ =
