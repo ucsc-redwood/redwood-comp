@@ -159,8 +159,8 @@ void BaseEngine::create_physical_device(vk::PhysicalDeviceType type) {
 // Device
 // ----------------------------------------------------------------------------
 
-[[nodiscard]] vk::PhysicalDeviceVulkan12Features
-check_vulkan_12_features(const vk::PhysicalDevice &physical_device) {
+[[nodiscard]] vk::PhysicalDeviceVulkan12Features check_vulkan_12_features(
+    const vk::PhysicalDevice &physical_device) {
   // we want to query and check if uniformAndStorageBuffer8BitAccess is
   // supported before we can create this feature struct
 
@@ -210,12 +210,13 @@ void BaseEngine::create_device(vk::QueueFlags queue_flags) {
   const auto queueFamilyProperties =
       physical_device_.getQueueFamilyProperties();
 
-  compute_queue_family_index_ = std::distance(
-      queueFamilyProperties.begin(),
-      std::find_if(queueFamilyProperties.begin(), queueFamilyProperties.end(),
-                   [queue_flags](const auto &qfp) {
-                     return qfp.queueFlags & queue_flags;
-                   }));
+  compute_queue_family_index_ =
+      std::distance(queueFamilyProperties.begin(),
+                    std::find_if(queueFamilyProperties.begin(),
+                                 queueFamilyProperties.end(),
+                                 [queue_flags](const auto &qfp) {
+                                   return qfp.queueFlags & queue_flags;
+                                 }));
 
   if (compute_queue_family_index_ == queueFamilyProperties.size()) {
     throw std::runtime_error("No queue family supports compute operations.");
@@ -267,7 +268,7 @@ void BaseEngine::initialize_vma_allocator() {
       .flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT,
       .physicalDevice = physical_device_,
       .device = device_,
-      .preferredLargeHeapBlockSize = 0, // Let VMA use default size
+      .preferredLargeHeapBlockSize = 0,  // Let VMA use default size
       .pAllocationCallbacks = nullptr,
       .pDeviceMemoryCallbacks = nullptr,
       .pHeapSizeLimit = nullptr,
