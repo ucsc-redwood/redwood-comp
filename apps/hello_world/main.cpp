@@ -78,9 +78,9 @@ int main(int argc, char** argv) {
 
   assert(!small_cores.empty());
 
-  spdlog::info("Small cores: [{}]", fmt::join(small_cores, ", "));
-  spdlog::info("Medium cores: [{}]", fmt::join(medium_cores, ", "));
-  spdlog::info("Big cores: [{}]", fmt::join(big_cores, ", "));
+  // spdlog::info("Small cores: [{}]", fmt::join(small_cores, ", "));
+  // spdlog::info("Medium cores: [{}]", fmt::join(medium_cores, ", "));
+  // spdlog::info("Big cores: [{}]", fmt::join(big_cores, ", "));
 
   spdlog::set_level(spdlog::level::trace);
 
