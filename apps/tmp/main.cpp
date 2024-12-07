@@ -8,7 +8,7 @@
 int main() {
   spdlog::set_level(spdlog::level::trace);
 
-  BaseEngine engine;
+  vulkan::BaseEngine engine;
 
   VulkanMemoryResource mr(engine.get_device());
 

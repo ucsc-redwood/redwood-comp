@@ -8,11 +8,13 @@
 #define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
 #endif
 
-// #include <memory>
+#include <limits>
 #include <vulkan/vulkan.hpp>
 
+namespace vulkan {
+
 class BaseEngine {
-public:
+ public:
   /**
    * @brief Constructs and initializes the Vulkan environment
    *
@@ -55,7 +57,7 @@ public:
    */
   [[nodiscard]] uint32_t get_subgroup_size() const;
 
-protected:
+ protected:
   void destroy() const;
 
   void initialize_dynamic_loader();
@@ -76,16 +78,14 @@ protected:
 
   uint32_t compute_queue_family_index_ = std::numeric_limits<uint32_t>::max();
 
-private:
+ private:
   vk::DynamicLoader dl_;
   vk::DispatchLoaderDynamic dldi_;
 
-  // vk::detail::DynamicLoader dl_;
-  // vk::detail::DispatchLoaderDynamic dldi_;
-
   PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr_;
-  //   PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr_;
   //   PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr_;
 
   std::vector<const char *> enabledLayers_;
 };
+
+}  // namespace vulkan
