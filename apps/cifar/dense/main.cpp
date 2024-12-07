@@ -2,6 +2,7 @@
 #include "../../read_config.hpp"
 #include "app_data.hpp"
 #include "host/host_dispatcher.hpp"
+#include "redwood/backends.hpp"
 
 // forward declare
 void run_vulkan_demo();
@@ -57,7 +58,7 @@ void run_cpu_demo(const std::vector<int>& cores, const size_t n_threads) {
 #include "vulkan/vk_dispatcher.hpp"
 
 void run_vulkan_demo() {
-  Engine engine;
+  vulkan::Engine engine;
   vulkan::VulkanMemoryResource vk_mr(engine);
   AppData app_data(&vk_mr);
 
