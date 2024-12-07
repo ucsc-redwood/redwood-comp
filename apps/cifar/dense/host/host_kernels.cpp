@@ -19,7 +19,7 @@ void conv2d_mt(const float* input_data,
                const int input_height,
                const int input_width,
                const float* weight_data,
-               const int weight_output_channels,
+               [[maybe_unused]] const int weight_output_channels,
                const int weight_input_channels,
                const int weight_height,
                const int weight_width,
@@ -37,9 +37,9 @@ void conv2d_mt(const float* input_data,
   int output_height = (input_height + 2 * padding - kernel_size) / stride + 1;
   int output_width = (input_width + 2 * padding - kernel_size) / stride + 1;
 
-  // Perform convolution with merged outer loops
-  [[maybe_unused]] const int total_iterations =
-      weight_output_channels * output_height * output_width;
+  // // Perform convolution with merged outer loops
+  // [[maybe_unused]] const int total_iterations =
+  //     weight_output_channels * output_height * output_width;
 
   for (int index = start; index < end; ++index) {
     int out_channel = index / (output_height * output_width);
@@ -97,6 +97,7 @@ void maxpool2d_mt(const float* input_data,
                   const int end) {
   int output_height = (input_height - pool_size) / stride + 1;
   int output_width = (input_width - pool_size) / stride + 1;
+  // int total_iterations = input_channels * output_height * output_width;
 
   for (int index = start; index < end; index++) {
     int c = index / (output_height * output_width);

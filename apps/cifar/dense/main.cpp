@@ -8,7 +8,10 @@ void run_cpu_demo(const std::vector<int>& small_cores, const size_t n_threads) {
   AppData app_data(mr);
 
   core::thread_pool pool(small_cores);
+  
   cpu::run_stage1(app_data, pool, n_threads).wait();
+  cpu::run_stage2(app_data, pool, n_threads).wait();
+
 }
 
 int main(int argc, char** argv) {
