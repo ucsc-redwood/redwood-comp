@@ -12,6 +12,7 @@
 #define VULKAN_HPP_NO_CONSTRUCTORS 1
 #endif
 
+
 #include <vulkan/vulkan.hpp>
 
 // Externally defined VMA allocator (you must have this created and initialized

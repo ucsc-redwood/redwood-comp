@@ -21,6 +21,8 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 BaseEngine::BaseEngine(const bool enable_validation_layer) {
   SPDLOG_TRACE("BaseEngine constructor");
 
+  initialize_dynamic_loader();
+
   if (enable_validation_layer) {
     request_validation_layer();
   }
@@ -51,24 +53,18 @@ void BaseEngine::destroy() const {
 void BaseEngine::initialize_dynamic_loader() {
   SPDLOG_TRACE("BaseEngine::initialize_dynamic_loader");
 
-  dl_ = vk::DynamicLoader();
-  // dl_ = vk::detail::DynamicLoader();
+  // vk::detail::DynamicLoader dl;
+  dl_ = vk::detail::DynamicLoader();
 
+  // Load the Vulkan library
   vkGetInstanceProcAddr_ =
       dl_.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
-
   if (!vkGetInstanceProcAddr_) {
-    throw std::runtime_error("vkGetInstanceProcAddr not found");
+    throw std::runtime_error("Failed to load vkGetInstanceProcAddr!");
   }
 
+  // Initialize the global function pointers
   VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr_);
-
-  vkGetDeviceProcAddr_ =
-      dl_.getProcAddress<PFN_vkGetDeviceProcAddr>("vkGetDeviceProcAddr");
-
-  if (!vkGetDeviceProcAddr_) {
-    throw std::runtime_error("vkGetDeviceProcAddr not found");
-  }
 }
 
 // ----------------------------------------------------------------------------
@@ -117,9 +113,13 @@ void BaseEngine::create_instance() {
       .ppEnabledLayerNames = enabledLayers_.data(),
   };
 
+  // Create the instance using the default dispatcher
   instance_ = vk::createInstance(instanceCreateInfo);
 
+  // Initialize instance-specific function pointers
   VULKAN_HPP_DEFAULT_DISPATCHER.init(instance_);
+
+  spdlog::info("Instance created successfully");
 }
 
 // ----------------------------------------------------------------------------
@@ -159,8 +159,8 @@ void BaseEngine::create_physical_device(vk::PhysicalDeviceType type) {
 // Device
 // ----------------------------------------------------------------------------
 
-[[nodiscard]] vk::PhysicalDeviceVulkan12Features check_vulkan_12_features(
-    const vk::PhysicalDevice &physical_device) {
+[[nodiscard]] vk::PhysicalDeviceVulkan12Features
+check_vulkan_12_features(const vk::PhysicalDevice &physical_device) {
   // we want to query and check if uniformAndStorageBuffer8BitAccess is
   // supported before we can create this feature struct
 
@@ -210,13 +210,12 @@ void BaseEngine::create_device(vk::QueueFlags queue_flags) {
   const auto queueFamilyProperties =
       physical_device_.getQueueFamilyProperties();
 
-  compute_queue_family_index_ =
-      std::distance(queueFamilyProperties.begin(),
-                    std::find_if(queueFamilyProperties.begin(),
-                                 queueFamilyProperties.end(),
-                                 [queue_flags](const auto &qfp) {
-                                   return qfp.queueFlags & queue_flags;
-                                 }));
+  compute_queue_family_index_ = std::distance(
+      queueFamilyProperties.begin(),
+      std::find_if(queueFamilyProperties.begin(), queueFamilyProperties.end(),
+                   [queue_flags](const auto &qfp) {
+                     return qfp.queueFlags & queue_flags;
+                   }));
 
   if (compute_queue_family_index_ == queueFamilyProperties.size()) {
     throw std::runtime_error("No queue family supports compute operations.");
@@ -258,63 +257,22 @@ void BaseEngine::initialize_vma_allocator() {
         "Physical device, device, or instance is not valid");
   }
 
-  //   // clang-format off
-  //   const VmaVulkanFunctions vulkan_functions{
-  //       .vkGetInstanceProcAddr =
-  //       VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr,
-  //       .vkGetDeviceProcAddr =
-  //       VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceProcAddr,
-  //       .vkGetPhysicalDeviceProperties =
-  //       VULKAN_HPP_DEFAULT_DISPATCHER.vkGetPhysicalDeviceProperties,
-  //       .vkGetPhysicalDeviceMemoryProperties =
-  //       VULKAN_HPP_DEFAULT_DISPATCHER.vkGetPhysicalDeviceMemoryProperties,
-  //       .vkAllocateMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkAllocateMemory,
-  //       .vkFreeMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkFreeMemory,
-  //       .vkMapMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkMapMemory,
-  //       .vkUnmapMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkUnmapMemory,
-  //       .vkFlushMappedMemoryRanges =
-  //       VULKAN_HPP_DEFAULT_DISPATCHER.vkFlushMappedMemoryRanges,
-  //       .vkInvalidateMappedMemoryRanges =
-  //       VULKAN_HPP_DEFAULT_DISPATCHER.vkInvalidateMappedMemoryRanges,
-  //       .vkBindBufferMemory =
-  //       VULKAN_HPP_DEFAULT_DISPATCHER.vkBindBufferMemory, .vkBindImageMemory
-  //       = VULKAN_HPP_DEFAULT_DISPATCHER.vkBindImageMemory,
-  //       .vkGetBufferMemoryRequirements =
-  //       VULKAN_HPP_DEFAULT_DISPATCHER.vkGetBufferMemoryRequirements,
-  //       .vkGetImageMemoryRequirements =
-  //       VULKAN_HPP_DEFAULT_DISPATCHER.vkGetImageMemoryRequirements,
-  //       .vkCreateBuffer = VULKAN_HPP_DEFAULT_DISPATCHER.vkCreateBuffer,
-  //       .vkDestroyBuffer = VULKAN_HPP_DEFAULT_DISPATCHER.vkDestroyBuffer,
-  //       .vkCreateImage = VULKAN_HPP_DEFAULT_DISPATCHER.vkCreateImage,
-  //       .vkDestroyImage = VULKAN_HPP_DEFAULT_DISPATCHER.vkDestroyImage,
-  //       .vkCmdCopyBuffer = VULKAN_HPP_DEFAULT_DISPATCHER.vkCmdCopyBuffer,
-  //       .vkGetBufferMemoryRequirements2KHR =
-  //       VULKAN_HPP_DEFAULT_DISPATCHER.vkGetBufferMemoryRequirements2,
-  //       .vkGetImageMemoryRequirements2KHR =
-  //       VULKAN_HPP_DEFAULT_DISPATCHER.vkGetImageMemoryRequirements2,
-  //       .vkBindBufferMemory2KHR =
-  //       VULKAN_HPP_DEFAULT_DISPATCHER.vkBindBufferMemory2,
-  //       .vkBindImageMemory2KHR =
-  //       VULKAN_HPP_DEFAULT_DISPATCHER.vkBindImageMemory2,
-  //       .vkGetPhysicalDeviceMemoryProperties2KHR =
-  //       VULKAN_HPP_DEFAULT_DISPATCHER.vkGetPhysicalDeviceMemoryProperties2,
-  //       .vkGetDeviceBufferMemoryRequirements =
-  //       VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceBufferMemoryRequirements,
-  //       .vkGetDeviceImageMemoryRequirements =
-  //       VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceImageMemoryRequirements,
-  //   };
-  //   // clang-format on
+  const VmaVulkanFunctions vulkan_functions{
+      .vkGetInstanceProcAddr =
+          VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr,
+      .vkGetDeviceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceProcAddr,
+  };
 
   const VmaAllocatorCreateInfo vma_allocator_create_info{
       .flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT,
       .physicalDevice = physical_device_,
       .device = device_,
-      .preferredLargeHeapBlockSize = 0,  // Let VMA use default size
+      .preferredLargeHeapBlockSize = 0, // Let VMA use default size
       .pAllocationCallbacks = nullptr,
       .pDeviceMemoryCallbacks = nullptr,
       .pHeapSizeLimit = nullptr,
-      //   .pVulkanFunctions = &vulkan_functions,
-      .pVulkanFunctions = nullptr,
+      .pVulkanFunctions = &vulkan_functions,
+      // .pVulkanFunctions = nullptr,
       .instance = instance_,
       .vulkanApiVersion = VK_API_VERSION_1_3,
       .pTypeExternalMemoryHandleTypes = nullptr};

@@ -3,6 +3,8 @@
 #include "base_engine.hpp"
 #include "vma_pmr.hpp"
 
+#include <spdlog/spdlog.h>
+
 int main() {
   spdlog::set_level(spdlog::level::trace);
 
