@@ -53,6 +53,7 @@ void Buffer::destroy() {
   SPD_TRACE_FUNC
 
   if (allocation_ != VK_NULL_HANDLE) {
+    spdlog::trace("Destroying buffer [{}]", static_cast<void *>(this));
     vmaDestroyBuffer(g_vma_allocator, this->get_handle(), allocation_);
   }
 }

@@ -61,7 +61,13 @@ class Engine final : public BaseEngine {
     SPD_TRACE_FUNC
   }
 
-  ~Engine() = default;
+  // ~Engine() = default;
+  ~Engine() {
+    for (auto& [ptr, buffer] : buffers_) {
+      buffer.reset();
+    }
+    buffers_.clear();
+  }
 
   /**
    * @brief Creates an untyped Vulkan buffer

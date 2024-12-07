@@ -55,7 +55,8 @@ void BaseEngine::destroy() const {
 void BaseEngine::initialize_dynamic_loader() {
   SPD_TRACE_FUNC
 
-  dl_ = vk::DynamicLoader();
+  // dl_ = vk::DynamicLoader();
+  dl_ = vk::detail::DynamicLoader();
 
   vkGetInstanceProcAddr_ =
       dl_.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");

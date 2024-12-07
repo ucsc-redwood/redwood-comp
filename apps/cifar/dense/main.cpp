@@ -57,13 +57,16 @@ void run_cpu_demo(const std::vector<int>& cores, const size_t n_threads) {
 #include "redwood/vulkan/vk_allocator.hpp"
 #include "vulkan/vk_dispatcher.hpp"
 
-void run_vulkan_demo() {
-  vulkan::Engine engine;
-  vulkan::VulkanMemoryResource vk_mr(engine);
-  AppData app_data(&vk_mr);
+// void run_vulkan_demo() {
+//   vulkan::Engine engine;
 
-  vulkan::run_stage1(engine, app_data);
-}
+//   {
+//     vulkan::VulkanMemoryResource vk_mr(engine);
+//     AppData app_data(&vk_mr);
+//     vulkan::run_stage1(engine, app_data);
+//   }
+
+// }
 
 #endif
 
@@ -83,10 +86,21 @@ int main(int argc, char** argv) {
 
   run_cpu_demo(small_cores, small_cores.size());
 
-  if constexpr (is_backend_enabled(BackendType::kVulkan)) {
-    spdlog::info("Vulkan backend is enabled");
-    run_vulkan_demo();
-  }
+  // if constexpr (is_backend_enabled(BackendType::kVulkan)) {
+  //   spdlog::info("Vulkan backend is enabled");
+  //   run_vulkan_demo();
+  // }
+
+
+  vulkan::Engine engine;
+
+    vulkan::VulkanMemoryResource vk_mr(engine);
+    AppData app_data(&vk_mr);
+    vulkan::run_stage1(engine, app_data);
+  
+
+
+
 
   spdlog::info("Done");
   return EXIT_SUCCESS;

@@ -2,6 +2,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include "../utils.hpp"
 #include "buffer.hpp"
 #include "engine.hpp"
 
@@ -18,11 +19,14 @@ class VulkanMemoryResource : public std::pmr::memory_resource {
 
  protected:
   void* do_allocate(std::size_t bytes, std::size_t) override {
+    SPD_TRACE_FUNC
+
     auto buffer = engine_.buffer(bytes);
     return buffer->as<void*>();
   }
 
   void do_deallocate(void*, std::size_t, std::size_t) override {
+    SPD_TRACE_FUNC
     // NO OP
   }
 
