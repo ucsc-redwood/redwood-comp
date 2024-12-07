@@ -2,6 +2,7 @@
 target("vk_vma_pmr")
     set_kind("binary")
     add_files("*.cpp")
+    add_includedirs("$(projectdir)/")
 
     add_packages("vulkan-hpp")
     add_packages("vulkan-memory-allocator")

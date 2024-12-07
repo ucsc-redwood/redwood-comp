@@ -1,15 +1,18 @@
 #pragma once
 
-#ifndef VULKAN_HPP_NO_CONSTRUCTORS
-#define VULKAN_HPP_NO_CONSTRUCTORS 1
-#endif
+// #ifndef VULKAN_HPP_NO_CONSTRUCTORS
+// #define VULKAN_HPP_NO_CONSTRUCTORS 1
+// #endif
 
-#ifndef VULKAN_HPP_DISPATCH_LOADER_DYNAMIC
-#define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
-#endif
+// #ifndef VULKAN_HPP_DISPATCH_LOADER_DYNAMIC
+// #define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
+// #endif
 
 #include <limits>
-#include <vulkan/vulkan.hpp>
+// #include <vulkan/vulkan.hpp>
+
+#include "vk.hpp"
+
 
 namespace vulkan {
 
