@@ -4,15 +4,15 @@
 #define VULKAN_HPP_NO_CONSTRUCTORS 1
 #endif
 
-#ifndef VULKAN_HPP_DISPATCH_LOADER_DYNAMIC
-#define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
-#endif
+// #ifndef VULKAN_HPP_DISPATCH_LOADER_DYNAMIC
+// #define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
+// #endif
 
 // #include <memory>
 #include <vulkan/vulkan.hpp>
 
 class BaseEngine {
- public:
+public:
   /**
    * @brief Constructs and initializes the Vulkan environment
    *
@@ -55,10 +55,10 @@ class BaseEngine {
    */
   [[nodiscard]] uint32_t get_subgroup_size() const;
 
- protected:
+protected:
   void destroy() const;
 
-  void initialize_dynamic_loader();
+  //   void initialize_dynamic_loader();
   void request_validation_layer();
 
   void create_instance();
@@ -76,12 +76,12 @@ class BaseEngine {
 
   uint32_t compute_queue_family_index_ = std::numeric_limits<uint32_t>::max();
 
- private:
-  vk::DynamicLoader dl_;
-  // vk::detail::DynamicLoader dl_;
+private:
+  // vk::DynamicLoader dl_;
+  //   vk::detail::DynamicLoader dl_;
 
-  PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr_;
-  PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr_;
+  //   PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr_;
+  //   PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr_;
 
   std::vector<const char *> enabledLayers_;
 };
