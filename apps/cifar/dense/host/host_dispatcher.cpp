@@ -114,6 +114,12 @@ auto run_stage2(AppData &app_data,
 // ----------------------------------------------------------------------------
 // Conv2
 // ----------------------------------------------------------------------------
+// We know from model:
+// Input: buffers.pool1_out (64 x 16 x 16)
+// Weights: buffers.conv2_weights (128 out_channels, 64 in_channels, 3x3 kernel)
+// Bias: buffers.conv2_bias (128)
+// Output: buffers.conv2_out (128 x 16 x 16)
+// ----------------------------------------------------------------------------
 
 auto run_stage3(AppData &app_data,
                 core::thread_pool &pool,
@@ -123,6 +129,18 @@ auto run_stage3(AppData &app_data,
 
   const int start = 0;
   const int end = total_iterations;
+
+  spdlog::debug(
+      "Conv2D: ({} x {} x {}) ---> ({} x {} x {}), Threads: {}, Total "
+      "iterations: {}",
+      model::kConv1OutChannels,
+      model::kPool1OutHeight,
+      model::kPool1OutWidth,
+      model::kConv2OutChannels,
+      model::kConv2OutHeight,
+      model::kConv2OutWidth,
+      n_threads,
+      total_iterations);
 
   return pool.submit_blocks(
       start,
@@ -163,6 +181,18 @@ auto run_stage4(AppData &app_data,
   const int start = 0;
   const int end = total_iterations;
 
+  spdlog::debug(
+      "MaxPool2D: ({} x {} x {}) ---> ({} x {} x {}), Threads: {}, Total "
+      "iterations: {}",
+      model::kConv2OutChannels,
+      model::kConv2OutHeight,
+      model::kConv2OutWidth,
+      model::kConv2OutChannels,
+      model::kPool2OutHeight,
+      model::kPool2OutWidth,
+      n_threads,
+      total_iterations);
+
   return pool.submit_blocks(
       start,
       end,
@@ -192,6 +222,18 @@ auto run_stage5(AppData &app_data,
 
   const int start = 0;
   const int end = total_iterations;
+
+  spdlog::debug(
+      "Conv2D: ({} x {} x {}) ---> ({} x {} x {}), Threads: {}, Total "
+      "iterations: {}",
+      model::kConv2OutChannels,
+      model::kPool2OutHeight,
+      model::kPool2OutWidth,
+      model::kConv3OutChannels,
+      model::kConv3OutHeight,
+      model::kConv3OutWidth,
+      n_threads,
+      total_iterations);
 
   return pool.submit_blocks(
       start,
@@ -232,6 +274,18 @@ auto run_stage6(AppData &app_data,
   const int start = 0;
   const int end = total_iterations;
 
+  spdlog::debug(
+      "Conv2D: ({} x {} x {}) ---> ({} x {} x {}), Threads: {}, Total "
+      "iterations: {}",
+      model::kConv3OutChannels,
+      model::kConv3OutHeight,
+      model::kConv3OutWidth,
+      model::kConv4OutChannels,
+      model::kConv4OutHeight,
+      model::kConv4OutWidth,
+      n_threads,
+      total_iterations);
+
   return pool.submit_blocks(
       start,
       end,
@@ -270,6 +324,18 @@ auto run_stage7(AppData &app_data,
 
   const int start = 0;
   const int end = total_iterations;
+
+  spdlog::debug(
+      "Conv2D: ({} x {} x {}) ---> ({} x {} x {}), Threads: {}, Total "
+      "iterations: {}",
+      model::kConv4OutChannels,
+      model::kConv4OutHeight,
+      model::kConv4OutWidth,
+      model::kConv5OutChannels,
+      model::kConv5OutHeight,
+      model::kConv5OutWidth,
+      n_threads,
+      total_iterations);
 
   return pool.submit_blocks(
       start,
@@ -310,6 +376,18 @@ auto run_stage8(AppData &app_data,
   const int start = 0;
   const int end = total_iterations;
 
+  spdlog::debug(
+      "MaxPool2D: ({} x {} x {}) ---> ({} x {} x {}), Threads: {}, Total "
+      "iterations: {}",
+      model::kConv5OutChannels,
+      model::kConv5OutHeight,
+      model::kConv5OutWidth,
+      model::kConv5OutChannels,
+      model::kPool3OutHeight,
+      model::kPool3OutWidth,
+      n_threads,
+      total_iterations);
+
   return pool.submit_blocks(
       start,
       end,
@@ -338,6 +416,12 @@ auto run_stage9(AppData &app_data,
 
   const int start = 0;
   const int end = total_iterations;
+
+  spdlog::debug("Linear: ({}) ---> ({}), Threads: {}, Total iterations: {}",
+                model::kLinearInFeatures,
+                model::kLinearOutFeatures,
+                n_threads,
+                total_iterations);
 
   return pool.submit_blocks(
       start,
