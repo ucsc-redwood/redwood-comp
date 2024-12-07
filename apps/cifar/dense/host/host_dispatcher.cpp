@@ -7,9 +7,9 @@
 
 namespace cpu {
 
-[[nodiscard]] core::multi_future<void> run_stage1(AppData &app_data,
-                                                  core::thread_pool &pool,
-                                                  const size_t n_threads) {
+core::multi_future<void> run_stage1(AppData &app_data,
+                                    core::thread_pool &pool,
+                                    const size_t n_threads) {
   spdlog::debug("CPU kernel 'conv2d', n = {}, threads = {}",
                 app_data.u_image.size(),
                 n_threads);
@@ -79,6 +79,44 @@ namespace cpu {
             end);
       },
       n_threads);
+}
+
+core::multi_future<void> run_stage2(AppData &app_data,
+                                    core::thread_pool &pool,
+                                    const size_t n_threads) {
+  const auto output_channels = model::conv1_filters;
+
+  return pool.submit_blocks(
+      static_cast<size_t>(0),
+      static_cast<size_t>(output_channels),
+      [&](const size_t start, const size_t end) {
+        cpu::kernels::dense::maxpool2d_mt(app_data.u_conv1_output.data(),
+                                          model::conv1_filters,
+                                          dims::conv1_h,
+                                          dims::conv1_w,
+                                          model::pool_size,
+                                          model::pool_stride,
+                                          app_data.u_pool1_output.data(),
+                                          start,
+                                          end);
+      },
+      n_threads);
+}
+
+core::multi_future<void> run_stage3(AppData &app_data,
+                                    core::thread_pool &pool,
+                                    const size_t n_threads) {
+  const auto output_channels = model::conv1_filters;
+
+  return pool.submit_blocks(
+      static_cast<size_t>(0),
+      static_cast<size_t>(output_channels),
+      [&](const size_t start, const size_t end) {
+
+        
+
+
+      });
 }
 
 }  // namespace cpu

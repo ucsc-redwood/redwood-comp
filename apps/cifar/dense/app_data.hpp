@@ -51,8 +51,7 @@ constexpr int pool2_h = pool_output(pool1_h);              // 8
 constexpr int pool2_w = pool_output(pool1_w);              // 8
 constexpr int pool3_h = pool_output(pool2_h);              // 4
 constexpr int pool3_w = pool_output(pool2_w);              // 4
-constexpr int flattened_size =
-    model::conv5_filters * pool3_h * pool3_w;  // 4096
+constexpr int flattened_size = model::conv5_filters * pool3_h * pool3_w;  // 4096
 
 }  // namespace dims
 
