@@ -55,8 +55,8 @@ void BaseEngine::destroy() const {
 void BaseEngine::initialize_dynamic_loader() {
   SPD_TRACE_FUNC
 
-  // Use vk::detail::DynamicLoader
-  dl_ = vk::detail::DynamicLoader();
+  // dl_ = vk::DynamicLoader();
+  dl_ = vk::DynamicLoader();
 
   vkGetInstanceProcAddr_ =
       dl_.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
@@ -65,7 +65,6 @@ void BaseEngine::initialize_dynamic_loader() {
     throw std::runtime_error("vkGetInstanceProcAddr not found");
   }
 
-  // Initialize the dispatcher before any Vulkan calls
   VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr_);
 
   vkGetDeviceProcAddr_ =
