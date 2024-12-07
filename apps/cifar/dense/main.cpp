@@ -3,27 +3,17 @@
 #include "app_data.hpp"
 #include "host/host_dispatcher.hpp"
 
-void run_cpu_demo(const std::vector<int>& small_cores, const size_t n_threads) {
-  auto mr = std::pmr::new_delete_resource();
-  AppData app_data(mr);
+// forward declare
+void run_vulkan_demo();
 
-  core::thread_pool pool(small_cores);
-
-  cpu::run_stage1(app_data, pool, n_threads).wait();
-  cpu::run_stage2(app_data, pool, n_threads).wait();
-  cpu::run_stage3(app_data, pool, n_threads).wait();
-  cpu::run_stage4(app_data, pool, n_threads).wait();
-  cpu::run_stage5(app_data, pool, n_threads).wait();
-  cpu::run_stage6(app_data, pool, n_threads).wait();
-  cpu::run_stage7(app_data, pool, n_threads).wait();
-  cpu::run_stage8(app_data, pool, n_threads).wait();
-  cpu::run_stage9(app_data, pool, n_threads).wait();
-
-  // Find the maximum class index using C++20 ranges
-  const auto ptr = app_data.u_linear_out.data();
+[[nodiscard]] int arg_max(const float* ptr) {
   const auto max_index = std::distance(
       ptr, std::ranges::max_element(ptr, ptr + model::kLinearOutFeatures));
 
+  return max_index;
+}
+
+void print_prediction(const int max_index) {
   static const std::unordered_map<int, std::string_view> class_names{
       {0, "airplanes"},
       {1, "cars"},
@@ -42,6 +32,40 @@ void run_cpu_demo(const std::vector<int>& small_cores, const size_t n_threads) {
   std::cout << std::endl;
 }
 
+void run_cpu_demo(const std::vector<int>& cores, const size_t n_threads) {
+  auto mr = std::pmr::new_delete_resource();
+  AppData app_data(mr);
+
+  core::thread_pool pool(cores);
+
+  cpu::run_stage1(app_data, pool, n_threads).wait();
+  cpu::run_stage2(app_data, pool, n_threads).wait();
+  cpu::run_stage3(app_data, pool, n_threads).wait();
+  cpu::run_stage4(app_data, pool, n_threads).wait();
+  cpu::run_stage5(app_data, pool, n_threads).wait();
+  cpu::run_stage6(app_data, pool, n_threads).wait();
+  cpu::run_stage7(app_data, pool, n_threads).wait();
+  cpu::run_stage8(app_data, pool, n_threads).wait();
+  cpu::run_stage9(app_data, pool, n_threads).wait();
+
+  print_prediction(arg_max(app_data.u_linear_out.data()));
+}
+
+#ifdef REDWOOD_VULKAN_BACKEND
+
+#include "redwood/vulkan/vk_allocator.hpp"
+#include "vulkan/vk_dispatcher.hpp"
+
+void run_vulkan_demo() {
+  Engine engine;
+  vulkan::VulkanMemoryResource vk_mr(engine);
+  AppData app_data(&vk_mr);
+
+  vulkan::run_stage1(engine, app_data);
+}
+
+#endif
+
 int main(int argc, char** argv) {
   auto config = helpers::init_demo(argc, argv);
   auto small_cores = helpers::get_cores_by_type(config["cpu_info"], "small");
@@ -57,6 +81,11 @@ int main(int argc, char** argv) {
   spdlog::set_level(spdlog::level::trace);
 
   run_cpu_demo(small_cores, small_cores.size());
+
+  if constexpr (is_backend_enabled(BackendType::kVulkan)) {
+    spdlog::info("Vulkan backend is enabled");
+    run_vulkan_demo();
+  }
 
   spdlog::info("Done");
   return EXIT_SUCCESS;
