@@ -13,14 +13,14 @@ target("app-tree")
       on_run(run_on_android)
     end
 
-    -- -- CUDA related (optional)
-    -- if has_config("cuda-backend") then
-    --   add_defines("REDWOOD_CUDA_BACKEND")
-    --   add_deps("cu-backend")
-    --   add_headerfiles("cuda/*.cuh")
-    --   add_files("cuda/*.cu")
-    --   add_cugencodes("native")
-    -- end
+    -- CUDA related (optional)
+    if has_config("cuda-backend") then
+      add_defines("REDWOOD_CUDA_BACKEND")
+      add_deps("cu-backend")
+      add_headerfiles("cuda/*.cuh")
+      add_files("cuda/*.cu")
+      add_cugencodes("native")
+    end
 
     -- -- Vulkan related (optional)
     -- if has_config("vulkan-backend") then

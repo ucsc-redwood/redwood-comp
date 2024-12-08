@@ -4,6 +4,7 @@
 #include "../read_config.hpp"
 #include "app_data.hpp"
 #include "host/host_dispatchers.hpp"
+#include "redwood/backends.hpp"
 
 void print_stats(const AppData& app_data) {
   spdlog::info("num_unique = {}", app_data.get_n_unique());
@@ -28,6 +29,35 @@ void run_cpu_demo(const std::vector<int>& cores, const size_t input_size) {
   print_stats(app_data);
 }
 
+#ifdef REDWOOD_CUDA_BACKEND
+
+#include <cuda_runtime.h>
+
+#include "cuda/cu_dispatcher.cuh"
+#include "redwood/cuda/cu_mem_resource.cuh"
+#include "redwood/cuda/helpers.cuh"
+
+void run_cuda_demo(const size_t input_size) {
+  cudaStream_t stream;
+  CUDA_CHECK(cudaStreamCreate(&stream));
+
+  cuda::CudaMemoryResource mr;
+  AppData app_data(&mr, input_size);
+
+  cuda::run_stage1(app_data, stream);
+
+  // // peek 10 morton codes
+  // for (int i = 0; i < 10; ++i) {
+  //   spdlog::info("morton_code[{}] = {}", i, app_data.u_morton_keys[i]);
+  // }
+
+  // print_stats(app_data);
+
+  CUDA_CHECK(cudaStreamDestroy(stream));
+}
+
+#endif
+
 int main(int argc, char** argv) {
   auto config = helpers::init_demo(argc, argv);
   auto small_cores = helpers::get_cores_by_type(config["cpu_info"], "small");
@@ -39,6 +69,10 @@ int main(int argc, char** argv) {
   spdlog::set_level(spdlog::level::trace);
 
   run_cpu_demo(small_cores, 640 * 480);
+
+  if constexpr (is_backend_enabled(BackendType::kCUDA)) {
+    run_cuda_demo(640 * 480);
+  }
 
   spdlog::info("Done.");
   return 0;
