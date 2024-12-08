@@ -49,6 +49,7 @@ target("bm-tree-cpu")
     add_headerfiles("*.hpp", "host/*.hpp")
     add_files("bm_cpu.cpp", "host/*.cpp")
     add_packages("spdlog", "cli11", "yaml-cpp")
+    add_packages("glm")
     add_deps("cpu-backend")
     if is_plat("android") then
       on_run(run_on_android)
