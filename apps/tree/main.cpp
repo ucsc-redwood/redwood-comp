@@ -6,6 +6,9 @@
 #include "host/host_dispatchers.hpp"
 #include "redwood/backends.hpp"
 
+// forward declarations
+void run_cuda_demo(const size_t input_size);
+
 void print_stats(const AppData& app_data) {
   spdlog::info("num_unique = {}", app_data.get_n_unique());
   spdlog::info("num_brt = {}", app_data.get_n_brt_nodes());
