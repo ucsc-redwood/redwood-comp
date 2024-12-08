@@ -8,9 +8,9 @@ local cu_source_files = {
   "cuda/04_radix_tree.cu",
   "cuda/05_edge_count.cu",
   "cuda/06_prefix_sum.cu",
+  "cuda/07_octree.cu",
   "cuda/cu_dispatcher.cu",
   "cuda/im_storage.cu",
-
 }
 
 target("app-tree")

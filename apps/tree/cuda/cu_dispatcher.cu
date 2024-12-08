@@ -9,6 +9,7 @@
 #include "04_radix_tree.cuh"
 #include "05_edge_count.cuh"
 #include "06_prefix_sum.cuh"
+#include "07_octree.cuh"
 #include "agents/prefix_sum_agent.cuh"
 #include "agents/unique_agent.cuh"
 #include "common.cuh"
@@ -594,41 +595,6 @@ void run_stage2(AppData &app_data, ImStorage &im_storage, cudaStream_t stream) {
 // ----------------------------------------------------------------------------
 
 void run_stage3(AppData &app_data, ImStorage &im_storage, cudaStream_t stream) {
-  // constexpr auto unique_block_size = UniqueAgent::n_threads;  // 256
-  //   constexpr auto prefix_block_size =
-  //       PrefixSumAgent<unsigned int>::n_threads;  // 128
-
-  //   const auto& stream = streams[stream_id];
-
-  //   k_FindDups<<<grid_size, unique_block_size, 0, stream>>>(
-  //       pipe->getSortedKeys(),
-  //       pipe->im_storage.u_flag_heads,  // <-- output
-  //       pipe->n_input());
-
-  //   // k_SingleBlockExclusiveScan<<<1, prefix_block_size, 0, stream>>>(
-  //   //    pipe->im_storage.u_flag_heads,
-  //   //    pipe->im_storage.u_flag_heads,  // <-- output
-  //   //    pipe->n_input());
-
-  //   SYNC_STREAM(stream);
-  //   std::partial_sum(pipe->im_storage.u_flag_heads,
-  //                    pipe->im_storage.u_flag_heads + pipe->n_input(),
-  //                    pipe->im_storage.u_flag_heads);
-
-  //   k_MoveDups<<<grid_size, unique_block_size, 0, stream>>>(
-  //       pipe->getSortedKeys(),
-  //       pipe->im_storage.u_flag_heads,
-  //       pipe->n_input(),
-  //       pipe->getUniqueKeys(),  // <-- output
-  //       nullptr);
-  //   SYNC_STREAM(stream);
-
-  //   // last element of flag_heads(prefix summed) is the number of unique
-  //   elements const auto n_unique =
-  //   pipe->im_storage.u_flag_heads[pipe->n_input() - 1] + 1;
-  //   pipe->set_n_unique(n_unique);
-  //   pipe->brt.set_n_nodes(n_unique - 1);
-
   constexpr auto unique_block_size = agents::UniqueAgent::n_threads;  // 256
   constexpr auto prefix_block_size =
       agents::PrefixSumAgent<unsigned int>::n_threads;  // 128
@@ -719,6 +685,66 @@ void run_stage6(AppData &app_data, cudaStream_t stream) {
 // Stage 7 (octree) (everything above -> octree)
 // ----------------------------------------------------------------------------
 
-void run_stage7(AppData &app_data, cudaStream_t stream) {}
+void run_stage7(AppData &app_data, cudaStream_t stream) {
+  constexpr auto block_size = 512;
+  //  k_MakeOctNodes<<<grid_size, block_size, 0, stream>>>(
+  //       pipe->oct.u_children,
+  //       pipe->oct.u_corner,
+  //       pipe->oct.u_cell_size,
+  //       pipe->oct.u_child_node_mask,
+  //       pipe->u_edge_offsets,
+  //       pipe->u_edge_counts,
+  //       pipe->getUniqueKeys(),
+  //       pipe->brt.u_prefix_n,
+  //       pipe->brt.u_parents,
+  //       pipe->min_coord,
+  //       pipe->range,
+  //       pipe->n_brt_nodes());
+
+  //   k_LinkLeafNodes<<<grid_size, block_size, 0, stream>>>(
+  //       pipe->oct.u_children,
+  //       pipe->oct.u_child_node_mask,
+  //       pipe->u_edge_offsets,
+  //       pipe->u_edge_counts,
+  //       pipe->getUniqueKeys(),
+  //       pipe->brt.u_has_leaf_left,
+  //       pipe->brt.u_has_leaf_right,
+  //       pipe->brt.u_prefix_n,
+  //       pipe->brt.u_parents,
+  //       pipe->brt.u_left_child,
+  //       pipe->n_brt_nodes());
+  constexpr auto gridDim = 16;
+  constexpr auto blockDim = 512;
+  constexpr auto sharedMem = 0;
+
+  kernels::k_MakeOctNodes<<<gridDim, blockDim, sharedMem, stream>>>(
+      reinterpret_cast<int(*)[8]>(app_data.oct.u_children.data()),
+      app_data.oct.u_corner.data(),
+      app_data.oct.u_cell_size.data(),
+      app_data.oct.u_child_node_mask.data(),
+      app_data.u_edge_offset.data(),
+      app_data.u_edge_count.data(),
+      app_data.get_unique_morton_keys(),
+      app_data.brt.u_prefix_n.data(),
+      app_data.brt.u_parents.data(),
+      app_data.min_coord,
+      app_data.range,
+      app_data.get_n_brt_nodes());
+
+  //   kernels::k_LinkLeafNodes<<<gridDim, blockDim, sharedMem, stream>>>(
+  //       reinterpret_cast<int(*)[8]>(app_data.oct.u_children.data()),
+  //       app_data.oct.u_child_node_mask.data(),
+  //       app_data.u_edge_offset.data(),
+  //       app_data.u_edge_count.data(),
+  //       app_data.get_unique_morton_keys(),
+  //       app_data.brt.u_has_leaf_left.data(),
+  //       app_data.brt.u_has_leaf_right.data(),
+  //       app_data.brt.u_prefix_n.data(),
+  //       app_data.brt.u_parents.data(),
+  //       app_data.brt.u_left_child.data(),
+  //       app_data.get_n_brt_nodes());
+
+  CUDA_CHECK(cudaStreamSynchronize(stream));
+}
 
 }  // namespace cuda
