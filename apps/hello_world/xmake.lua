@@ -1,6 +1,4 @@
 
-add_requires("cli11")
-
 target("app-hello")
     set_kind("binary")
     add_includedirs("$(projectdir)")
