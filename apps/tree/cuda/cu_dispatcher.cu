@@ -7,6 +7,8 @@
 #include "02_sort.cuh"
 #include "03_unique.cuh"
 #include "04_radix_tree.cuh"
+#include "05_edge_count.cuh"
+#include "06_prefix_sum.cuh"
 #include "agents/prefix_sum_agent.cuh"
 #include "agents/unique_agent.cuh"
 #include "common.cuh"
@@ -675,6 +677,48 @@ void run_stage4(AppData &app_data, cudaStream_t stream) {
       app_data.brt.u_has_leaf_right.data(),
       app_data.brt.u_left_child.data(),
       app_data.brt.u_parents.data());
+
+  CUDA_CHECK(cudaStreamSynchronize(stream));
 }
+
+// ----------------------------------------------------------------------------
+// Stage 5 (edge count) (tree nodes -> edge count)
+// ----------------------------------------------------------------------------
+
+void run_stage5(AppData &app_data, cudaStream_t stream) {
+  constexpr auto gridDim = 16;
+  constexpr auto blockDim = 512;
+  constexpr auto sharedMem = 0;
+
+  kernels::k_EdgeCount<<<gridDim, blockDim, sharedMem, stream>>>(
+      app_data.brt.u_prefix_n.data(),
+      app_data.brt.u_parents.data(),
+      app_data.u_edge_count.data(),
+      app_data.get_n_brt_nodes());
+
+  CUDA_CHECK(cudaStreamSynchronize(stream));
+}
+
+// ----------------------------------------------------------------------------
+// Stage 6 (edge offset) (edge count -> edge offset)
+// ----------------------------------------------------------------------------
+
+void run_stage6(AppData &app_data, cudaStream_t stream) {
+  constexpr auto n_threads = agents::PrefixSumAgent<int>::n_threads;
+
+  // has to be single block
+  kernels::k_SingleBlockExclusiveScan<<<1, n_threads, 0, stream>>>(
+      app_data.u_edge_count.data(),
+      app_data.u_edge_offset.data(),  // <-- output
+      app_data.get_n_brt_nodes());
+
+  CUDA_CHECK(cudaStreamSynchronize(stream));
+}
+
+// ----------------------------------------------------------------------------
+// Stage 7 (octree) (everything above -> octree)
+// ----------------------------------------------------------------------------
+
+void run_stage7(AppData &app_data, cudaStream_t stream) {}
 
 }  // namespace cuda

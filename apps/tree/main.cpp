@@ -66,6 +66,9 @@ void run_cuda_demo(const size_t input_size) {
 
   cuda::run_stage3(app_data, im_storage, stream);
   cuda::run_stage4(app_data, stream);
+  cuda::run_stage5(app_data, stream);
+  cuda::run_stage6(app_data, stream);
+  cuda::run_stage7(app_data, stream);
 
   // print_stats(app_data);
 
