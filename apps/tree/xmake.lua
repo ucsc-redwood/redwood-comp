@@ -1,6 +1,13 @@
 
 add_requires("glm")
 
+local cu_source_files = {
+  "cuda/01_morton.cu",
+  "cuda/02_sort.cu",
+  "cuda/cu_dispatcher.cu",
+  "cuda/im_storage.cu",
+}
+
 target("app-tree")
     set_kind("binary")
     add_includedirs("$(projectdir)")
@@ -14,13 +21,13 @@ target("app-tree")
     end
 
     -- CUDA related (optional)
-    if has_config("cuda-backend") then
+    -- if has_config("cuda-backend") then
       add_defines("REDWOOD_CUDA_BACKEND")
       add_deps("cu-backend")
       add_headerfiles("cuda/**/*.cuh")
-      add_files("cuda/*.cu")
+      add_files(cu_source_files)
       add_cugencodes("native")
-    end
+    -- end
 
     -- -- Vulkan related (optional)
     -- if has_config("vulkan-backend") then
