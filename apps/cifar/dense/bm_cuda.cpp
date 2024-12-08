@@ -1,42 +1,50 @@
 #include <benchmark/benchmark.h>
+#include <cuda_runtime.h>
+#include <spdlog/spdlog.h>
+
+#include <memory>
 
 #include "app_data.hpp"
-#include "vulkan/vk_dispatcher.hpp"
+#include "cuda/cu_dispatcher.cuh"
+#include "redwood/cuda/cu_mem_resource.cuh"
+#include "redwood/cuda/helpers.cuh"
 
 // ----------------------------------------------------------------------------
 // Fixtures
 // ----------------------------------------------------------------------------
 
-class iGPU_Vulkan : public benchmark::Fixture {
+class iGPU_CUDA : public benchmark::Fixture {
  protected:
   void SetUp(benchmark::State&) override {
-    engine = std::make_unique<vulkan::Engine>();
-    app_data = std::make_unique<AppData>(engine->get_mr());
-    dispatcher = std::make_unique<vulkan::Dispatcher>(*engine, *app_data);
+    CUDA_CHECK(cudaStreamCreate(&stream));
+
+    // Keep the memory resource alive for the lifetime of the fixture
+    mr = std::make_unique<cuda::CudaMemoryResource>();
+    app_data = std::make_unique<AppData>(mr.get());
   }
 
   void TearDown(benchmark::State&) override {
+    CUDA_CHECK(cudaStreamSynchronize(stream));
+
     app_data.reset();
-    engine.reset();
-    dispatcher.reset();
+    CUDA_CHECK(cudaStreamDestroy(stream));
   }
 
-  std::unique_ptr<vulkan::Engine> engine;
+  std::unique_ptr<cuda::CudaMemoryResource> mr;
   std::unique_ptr<AppData> app_data;
-  std::unique_ptr<vulkan::Dispatcher> dispatcher;
+  cudaStream_t stream;
 };
 
 // ----------------------------------------------------------------------------
 // Benchmarks
 // ----------------------------------------------------------------------------
 
-#define DEFINE_PINNED_BENCHMARK(NAME)   \
-  BENCHMARK_DEFINE_F(iGPU_Vulkan, NAME) \
-  (benchmark::State & state) {          \
-    auto seq = engine->sequence();      \
-    for (auto _ : state) {              \
-      dispatcher->NAME(seq.get());      \
-    }                                   \
+#define DEFINE_PINNED_BENCHMARK(NAME) \
+  BENCHMARK_DEFINE_F(iGPU_CUDA, NAME) \
+  (benchmark::State & state) {        \
+    for (auto _ : state) {            \
+      cuda::NAME(*app_data, stream);  \
+    }                                 \
   }
 
 DEFINE_PINNED_BENCHMARK(run_stage1)
@@ -54,8 +62,8 @@ DEFINE_PINNED_BENCHMARK(run_stage9)
 void RegisterBenchmarks() {
 #define REGISTER_BENCHMARK(NAME)                    \
   ::benchmark::internal::RegisterBenchmarkInternal( \
-      new iGPU_Vulkan_##NAME##_Benchmark())         \
-      ->Name("iGPU_Vulkan/" #NAME)                  \
+      new iGPU_CUDA_##NAME##_Benchmark())           \
+      ->Name("iGPU_CUDA/" #NAME)                    \
       ->Unit(benchmark::kMillisecond)               \
       ->Iterations(100);
 

@@ -65,3 +65,27 @@ target_end()
 
 end
 
+if has_config("cuda-backend") then
+
+target("bm-cifar-dense-cuda")
+    set_kind("binary")
+    add_includedirs("$(projectdir)")
+    add_headerfiles("*.hpp")
+    add_files("bm_cuda.cpp", "app_data.cpp")
+    add_packages("spdlog", "cli11", "yaml-cpp")
+
+    if is_plat("android") then
+      on_run(run_on_android)
+    end
+
+    add_packages("benchmark")
+    
+    add_defines("REDWOOD_CUDA_BACKEND")
+    add_deps("cu-backend")
+    add_headerfiles("cuda/*.cuh")
+    add_files("cuda/*.cu")
+    add_cugencodes("native")
+
+target_end()
+
+end
