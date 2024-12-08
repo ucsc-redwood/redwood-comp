@@ -679,6 +679,10 @@ void run_stage6(AppData &app_data, cudaStream_t stream) {
       app_data.get_n_brt_nodes());
 
   CUDA_CHECK(cudaStreamSynchronize(stream));
+
+  // num oct is the result of last of prefix sum
+  app_data.set_n_octree_nodes(
+      app_data.u_edge_offset[app_data.get_n_brt_nodes() - 1]);
 }
 
 // ----------------------------------------------------------------------------

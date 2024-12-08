@@ -67,10 +67,22 @@ void run_cuda_demo(const size_t input_size) {
   cuda::run_stage3(app_data, im_storage, stream);
   cuda::run_stage4(app_data, stream);
   cuda::run_stage5(app_data, stream);
+
+  // peek 10 edge count
+  for (auto i = 0; i < 10; ++i) {
+    spdlog::info("edge_count[{}] = {}", i, app_data.u_edge_count[i]);
+  }
+
   cuda::run_stage6(app_data, stream);
+
+  // peek 10 edge offset
+  for (auto i = 0; i < 10; ++i) {
+    spdlog::info("edge_offset[{}] = {}", i, app_data.u_edge_offset[i]);
+  }
+
   cuda::run_stage7(app_data, stream);
 
-  // print_stats(app_data);
+  print_stats(app_data);
 
   CUDA_CHECK(cudaStreamDestroy(stream));
 }
