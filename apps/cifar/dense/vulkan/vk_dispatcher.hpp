@@ -44,10 +44,9 @@ struct Dispatcher {
   void run_stage8(Sequence *seq);
   void run_stage9(Sequence *seq);
 
- private:
-  Engine &engine_ref_;
-  AppData &app_data_ref_;
-  std::unordered_map<std::string, std::shared_ptr<Algorithm>> algorithms_;
+  Engine &engine_ref;
+  AppData &app_data_ref;
+  std::unordered_map<std::string, std::shared_ptr<Algorithm>> algorithms;
 };
 
 }  // namespace vulkan
