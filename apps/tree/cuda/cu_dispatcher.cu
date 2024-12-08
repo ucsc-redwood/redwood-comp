@@ -463,6 +463,29 @@ __global__ void k_DigitBinningPass(unsigned int *sort,
   }
 }
 
+// ----------------------------------------------------------------------------
+// Unique
+// ----------------------------------------------------------------------------
+
+__global__ void k_FindDups(const unsigned int *u_keys,
+                           int *u_flag_heads,
+                           const int n) {
+  __shared__ agents::UniqueAgent::TempStorage temp_storage;
+
+  agents::UniqueAgent agent(n);
+  agent.Process_FindDups(temp_storage, u_keys, u_flag_heads, n);
+}
+
+__global__ void k_MoveDups(const unsigned int *u_keys,
+                           const int *u_flag_heads_sums,
+                           const int n,
+                           unsigned int *u_keys_out,
+                           int *n_unique_out) {
+  agents::UniqueAgent agent(n);
+  agent.Process_MoveDups(
+      u_keys, u_flag_heads_sums, n, u_keys_out, n_unique_out);
+}
+
 }  // namespace kernels
 
 // ----------------------------------------------------------------------------
@@ -631,5 +654,11 @@ void run_stage3(AppData &app_data, ImStorage &im_storage, cudaStream_t stream) {
   app_data.set_n_unique(n_unique);
   app_data.set_n_brt_nodes(n_unique - 1);
 }
+
+// ----------------------------------------------------------------------------
+// Stage 4 (build tree) (unique sorted morton code -> tree nodes)
+// ----------------------------------------------------------------------------
+
+void run_stage4(AppData &app_data, cudaStream_t stream) {}
 
 }  // namespace cuda

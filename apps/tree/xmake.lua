@@ -4,6 +4,7 @@ add_requires("glm")
 local cu_source_files = {
   "cuda/01_morton.cu",
   "cuda/02_sort.cu",
+  "cuda/03_unique.cu",
   "cuda/cu_dispatcher.cu",
   "cuda/im_storage.cu",
 }
