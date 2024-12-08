@@ -61,9 +61,6 @@ class VulkanMemoryResource : public std::pmr::memory_resource {
   [[nodiscard]]
   vk::Buffer get_buffer_from_pointer(void *p);
 
-  // [[nodiscard]]
-  // vk::DescriptorBufferInfo get_descriptor_buffer_info(void *p);
-
   [[nodiscard]]
   vk::DescriptorBufferInfo make_descriptor_buffer_info(vk::Buffer buffer) const;
 

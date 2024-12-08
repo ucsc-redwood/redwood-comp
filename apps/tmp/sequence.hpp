@@ -62,7 +62,6 @@ class Sequence {
   vk::Device device_ref_;
   vk::Queue compute_queue_ref_;
 
-  // std::shared_ptr<vk::Queue> compute_queue_ptr_;
   uint32_t compute_queue_index_;
 
   vk::CommandBuffer handle_;

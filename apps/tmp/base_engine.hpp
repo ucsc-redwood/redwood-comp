@@ -1,18 +1,8 @@
 #pragma once
 
-// #ifndef VULKAN_HPP_NO_CONSTRUCTORS
-// #define VULKAN_HPP_NO_CONSTRUCTORS 1
-// #endif
-
-// #ifndef VULKAN_HPP_DISPATCH_LOADER_DYNAMIC
-// #define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
-// #endif
-
 #include <limits>
-// #include <vulkan/vulkan.hpp>
 
 #include "vk.hpp"
-
 
 namespace vulkan {
 
@@ -41,22 +31,6 @@ class BaseEngine {
   [[nodiscard]] uint32_t get_compute_queue_family_index() const {
     return compute_queue_family_index_;
   }
-
-  // /**
-  //  * @brief Get the compute queue
-  //  * @return Shared pointer to the compute queue
-  //  */
-  // [[nodiscard]] std::shared_ptr<vk::Queue> get_compute_queue_ptr() const {
-  //   return std::make_shared<vk::Queue>(compute_queue_);
-  // }
-
-  // /**
-  //  * @brief Get the compute queue family index
-  //  * @return Index of the compute queue family
-  //  */
-  // [[nodiscard]] uint32_t get_compute_queue_family_index() const {
-  //   return compute_queue_family_index_;
-  // }
 
   /**
    * @brief Get the subgroup size

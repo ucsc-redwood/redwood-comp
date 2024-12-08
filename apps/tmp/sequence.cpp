@@ -17,19 +17,6 @@ Sequence::Sequence(vk::Device device_ref,
   create_command_buffer();
 }
 
-// Sequence::Sequence(std::shared_ptr<vk::Device> device_ptr,
-//                    std::shared_ptr<vk::Queue> compute_queue_ptr,
-//                    uint32_t compute_queue_index)
-//     : VulkanResource<vk::CommandBuffer>(device_ptr),
-//       compute_queue_ptr_(std::move(compute_queue_ptr)),
-//       compute_queue_index_(compute_queue_index) {
-//   SPD_TRACE_FUNC
-
-//   create_sync_objects();
-//   create_command_pool();
-//   create_command_buffer();
-// }
-
 void Sequence::destroy() { SPDLOG_TRACE("Sequence destroy"); }
 
 void Sequence::create_command_pool() {
@@ -101,20 +88,6 @@ void Sequence::sync() const {
     throw std::runtime_error("Failed to reset sequence");
   }
 }
-
-// void Sequence::record_commands(const Algorithm* algo) const {
-//   cmd_begin();
-
-//   algo->record_bind_core(handle_);
-
-//   if (algo->has_push_constants()) {
-//     algo->record_bind_push(handle_);
-//   }
-
-//   algo->record_dispatch(handle_);
-
-//   cmd_end();
-// }
 
 void Sequence::record_commands(const Algorithm* algo,
                                const uint32_t data_count) const {

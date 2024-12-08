@@ -8,11 +8,11 @@
 #include "sequence.hpp"
 #include "vma_pmr.hpp"
 
-struct VulkanEngine {
+class VulkanEngine final : public vulkan::BaseEngine {
+ public:
   explicit VulkanEngine()
-      : base_engine(),
-        mr_ptr(
-            std::make_unique<VulkanMemoryResource>(base_engine.get_device())) {}
+      : vulkan::BaseEngine(),
+        mr_ptr(std::make_unique<VulkanMemoryResource>(get_device())) {}
 
   [[nodiscard]]
   std::shared_ptr<vulkan::Algorithm> algorithm(
@@ -25,12 +25,22 @@ struct VulkanEngine {
   [[nodiscard]]
   std::shared_ptr<vulkan::Sequence> sequence() {
     return std::make_shared<vulkan::Sequence>(
-        base_engine.get_device(),
-        base_engine.get_compute_queue(),
-        base_engine.get_compute_queue_family_index());
+        this->get_device(),
+        this->get_compute_queue(),
+        this->get_compute_queue_family_index());
   }
 
-  vulkan::BaseEngine base_engine;
+  [[nodiscard]]
+  VulkanMemoryResource *get_mr() {
+    return mr_ptr.get();
+  }
+
+  [[nodiscard]]
+  vk::Buffer get_buffer(void *ptr) {
+    return mr_ptr->get_buffer_from_pointer(ptr);
+  }
+
+ private:
   std::unique_ptr<VulkanMemoryResource> mr_ptr;
 };
 
@@ -40,17 +50,17 @@ int main() {
   VulkanEngine engine;
 
   const size_t n = 1024;
-  std::pmr::vector<float> vec1(n, engine.mr_ptr.get());
-  std::pmr::vector<float> vec2(n, engine.mr_ptr.get());
-  std::pmr::vector<float> vec3(n, engine.mr_ptr.get());
+  std::pmr::vector<float> vec1(n, engine.get_mr());
+  std::pmr::vector<float> vec2(n, engine.get_mr());
+  std::pmr::vector<float> vec3(n, engine.get_mr());
 
   std::ranges::fill(vec1, 1.0f);
   std::ranges::fill(vec2, 2.0f);
   std::ranges::fill(vec3, 0.0f);
 
-  vk::Buffer vec1_buffer = engine.mr_ptr->get_buffer_from_pointer(vec1.data());
-  vk::Buffer vec2_buffer = engine.mr_ptr->get_buffer_from_pointer(vec2.data());
-  vk::Buffer vec3_buffer = engine.mr_ptr->get_buffer_from_pointer(vec3.data());
+  vk::Buffer vec1_buffer = engine.get_buffer(vec1.data());
+  vk::Buffer vec2_buffer = engine.get_buffer(vec2.data());
+  vk::Buffer vec3_buffer = engine.get_buffer(vec3.data());
 
   struct PushConstants {
     int n;
