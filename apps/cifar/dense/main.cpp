@@ -6,6 +6,7 @@
 
 // forward declare
 void run_vulkan_demo();
+void run_cuda_demo();
 
 [[nodiscard]] int arg_max(const float* ptr) {
   const auto max_index = std::distance(
@@ -79,6 +80,30 @@ void run_vulkan_demo() {
 
 #endif
 
+#ifdef REDWOOD_CUDA_BACKEND
+
+#include <cuda_runtime.h>
+
+#include "cuda/cu_dispatcher.cuh"
+#include "redwood/cuda/cu_mem_resource.cuh"
+#include "redwood/cuda/helpers.cuh"
+
+void run_cuda_demo() {
+  cudaStream_t stream;
+  CUDA_CHECK(cudaStreamCreate(&stream));
+
+  cuda::CudaMemoryResource mr;
+
+  AppData app_data(&mr);
+  cuda::run_stage1(app_data, stream);
+
+  print_prediction(arg_max(app_data.u_linear_out.data()));
+
+  CUDA_CHECK(cudaStreamDestroy(stream));
+}
+
+#endif
+
 int main(int argc, char** argv) {
   auto config = helpers::init_demo(argc, argv);
   auto small_cores = helpers::get_cores_by_type(config["cpu_info"], "small");
@@ -94,6 +119,11 @@ int main(int argc, char** argv) {
   if constexpr (is_backend_enabled(BackendType::kVulkan)) {
     spdlog::info("Vulkan backend is enabled");
     run_vulkan_demo();
+  }
+
+  if constexpr (is_backend_enabled(BackendType::kCUDA)) {
+    spdlog::info("CUDA backend is enabled");
+    run_cuda_demo();
   }
 
   spdlog::info("Done");
