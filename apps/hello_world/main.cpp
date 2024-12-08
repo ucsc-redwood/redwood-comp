@@ -54,6 +54,7 @@ void run_vulkan_backend_demo(const size_t n) {
   AppData app_data(engine.get_mr(), n);
 
   vulkan::run_stage1(engine, app_data);
+
   print_output(app_data);
 }
 

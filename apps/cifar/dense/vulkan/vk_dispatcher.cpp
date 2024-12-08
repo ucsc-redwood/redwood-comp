@@ -98,4 +98,66 @@ void run_stage1(Engine &engine, AppData &app_data) {
   seq->sync();
 }
 
+void run_stage2(Engine &engine, AppData &app_data) {
+  spdlog::info("Running stage 2");
+
+  // layout(push_constant) uniform Params {
+  //   uint input_channels;
+  //   uint input_height;
+  //   uint input_width;
+  //   uint pool_size;
+  //   uint stride;
+  //   uint output_height;
+  //   uint output_width;
+  // }
+  // params;
+
+  struct PushConstants {
+    uint32_t input_channels;
+    uint32_t input_height;
+    uint32_t input_width;
+    uint32_t pool_size;
+    uint32_t stride;
+    uint32_t output_height;
+    uint32_t output_width;
+  };
+
+  // layout(std430, set = 0, binding = 0) readonly buffer InputBuffer {
+  //   float input_data[];
+  // };
+  // layout(std430, set = 0, binding = 1) writeonly buffer OutputBuffer {
+  //   float output_data[];
+  // };
+
+  static auto algo =
+      engine
+          .algorithm(
+              "cifar_maxpool2d.comp",
+              {
+                  engine.get_buffer(app_data.u_conv1_out.data()),  // input
+                  engine.get_buffer(app_data.u_pool1_out.data()),  // output
+              })
+          ->set_push_constants<PushConstants>({
+              .input_channels = model::kConv1OutChannels,
+              .input_height = model::kConv1OutHeight,
+              .input_width = model::kConv1OutWidth,
+              .pool_size = model::kPoolSize,
+              .stride = model::kPoolStride,
+              .output_height = model::kPool1OutHeight,
+              .output_width = model::kPool1OutWidth,
+          })
+          ->build();
+
+  const int total_iterations =
+      model::kConv1OutChannels * model::kPool1OutHeight * model::kPool1OutWidth;
+
+  auto seq = engine.sequence();
+
+  seq->record_commands(algo.get(), total_iterations);
+
+  seq->launch_kernel_async();
+
+  seq->sync();
+}
+
 }  // namespace vulkan

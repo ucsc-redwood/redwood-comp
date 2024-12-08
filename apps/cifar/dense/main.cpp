@@ -62,6 +62,7 @@ void run_vulkan_demo() {
   AppData app_data(engine.get_mr());
 
   vulkan::run_stage1(engine, app_data);
+  vulkan::run_stage2(engine, app_data);
 }
 
 #endif
