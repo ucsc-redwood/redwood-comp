@@ -57,6 +57,8 @@ void run_cuda_demo(const size_t input_size) {
 
   cuda::run_stage1(app_data, stream);
   cuda::run_stage2(app_data, im_storage, stream);
+  cuda::run_stage3(app_data, im_storage, stream);
+  cuda::run_stage4(app_data, stream);
 
   if (std::ranges::is_sorted(app_data.u_morton_keys)) {
     spdlog::info("Morton keys are sorted");

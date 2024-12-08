@@ -1,13 +1,18 @@
 #include <spdlog/spdlog.h>
 
 #include <cub/util_math.cuh>
+#include <numeric>
 
 #include "01_morton.cuh"
 #include "02_sort.cuh"
+#include "03_unique.cuh"
+#include "agents/prefix_sum_agent.cuh"
+#include "agents/unique_agent.cuh"
 #include "common.cuh"
 #include "cu_dispatcher.cuh"
 #include "im_storage.cuh"
 #include "redwood/cuda/helpers.cuh"
+
 namespace cuda {
 
 namespace kernels {
@@ -464,7 +469,7 @@ __global__ void k_DigitBinningPass(unsigned int *sort,
 // Stage 1 (input -> morton code)
 // ----------------------------------------------------------------------------
 
-void run_stage1(AppData &app_data, const cudaStream_t stream) {
+void run_stage1(AppData &app_data, cudaStream_t stream) {
   static constexpr auto block_size = 256;
   const auto grid_size = div_up(app_data.get_n_input(), block_size);
   constexpr auto s_mem = 0;
@@ -491,9 +496,7 @@ void run_stage1(AppData &app_data, const cudaStream_t stream) {
 // Stage 2 (sort) (morton code -> sorted morton code)
 // ----------------------------------------------------------------------------
 
-void run_stage2(AppData &app_data,
-                ImStorage &im_storage,
-                const cudaStream_t stream) {
+void run_stage2(AppData &app_data, ImStorage &im_storage, cudaStream_t stream) {
   const auto n = app_data.get_n_input();
 
   im_storage.clearSmem();
@@ -556,6 +559,77 @@ void run_stage2(AppData &app_data,
           24);
 
   CUDA_CHECK(cudaStreamSynchronize(stream));
+}
+
+// ----------------------------------------------------------------------------
+// Stage 3 (unique) (sorted morton code -> unique sorted morton code)
+// ----------------------------------------------------------------------------
+
+void run_stage3(AppData &app_data, ImStorage &im_storage, cudaStream_t stream) {
+  // constexpr auto unique_block_size = UniqueAgent::n_threads;  // 256
+  //   constexpr auto prefix_block_size =
+  //       PrefixSumAgent<unsigned int>::n_threads;  // 128
+
+  //   const auto& stream = streams[stream_id];
+
+  //   k_FindDups<<<grid_size, unique_block_size, 0, stream>>>(
+  //       pipe->getSortedKeys(),
+  //       pipe->im_storage.u_flag_heads,  // <-- output
+  //       pipe->n_input());
+
+  //   // k_SingleBlockExclusiveScan<<<1, prefix_block_size, 0, stream>>>(
+  //   //    pipe->im_storage.u_flag_heads,
+  //   //    pipe->im_storage.u_flag_heads,  // <-- output
+  //   //    pipe->n_input());
+
+  //   SYNC_STREAM(stream);
+  //   std::partial_sum(pipe->im_storage.u_flag_heads,
+  //                    pipe->im_storage.u_flag_heads + pipe->n_input(),
+  //                    pipe->im_storage.u_flag_heads);
+
+  //   k_MoveDups<<<grid_size, unique_block_size, 0, stream>>>(
+  //       pipe->getSortedKeys(),
+  //       pipe->im_storage.u_flag_heads,
+  //       pipe->n_input(),
+  //       pipe->getUniqueKeys(),  // <-- output
+  //       nullptr);
+  //   SYNC_STREAM(stream);
+
+  //   // last element of flag_heads(prefix summed) is the number of unique
+  //   elements const auto n_unique =
+  //   pipe->im_storage.u_flag_heads[pipe->n_input() - 1] + 1;
+  //   pipe->set_n_unique(n_unique);
+  //   pipe->brt.set_n_nodes(n_unique - 1);
+
+  constexpr auto unique_block_size = agents::UniqueAgent::n_threads;  // 256
+  constexpr auto prefix_block_size =
+      agents::PrefixSumAgent<unsigned int>::n_threads;  // 128
+
+  constexpr auto grid_size = 16;
+
+  kernels::k_FindDups<<<grid_size, unique_block_size, 0, stream>>>(
+      app_data.get_sorted_morton_keys(),
+      im_storage.u_flag_heads,  // <-- output
+      app_data.get_n_input());
+
+  CUDA_CHECK(cudaStreamSynchronize(stream));
+
+  ::std::partial_sum(im_storage.u_flag_heads,
+                     im_storage.u_flag_heads + app_data.get_n_input(),
+                     im_storage.u_flag_heads);
+
+  kernels::k_MoveDups<<<grid_size, unique_block_size, 0, stream>>>(
+      app_data.get_sorted_morton_keys(),
+      im_storage.u_flag_heads,
+      app_data.get_n_input(),
+      app_data.get_unique_morton_keys(),  // <-- output
+      nullptr);
+
+  CUDA_CHECK(cudaStreamSynchronize(stream));
+
+  const auto n_unique = im_storage.u_flag_heads[app_data.get_n_input() - 1] + 1;
+  app_data.set_n_unique(n_unique);
+  app_data.set_n_brt_nodes(n_unique - 1);
 }
 
 }  // namespace cuda
