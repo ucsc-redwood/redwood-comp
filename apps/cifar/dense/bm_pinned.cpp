@@ -155,8 +155,10 @@ int main(int argc, char** argv) {
   // --------------------------------------------------------------------------
   // Run benchmarks
   // --------------------------------------------------------------------------
-
+  
   benchmark::Initialize(&argc, argv);
   benchmark::RunSpecifiedBenchmarks();
+  benchmark::Shutdown();
   return 0;
 }
+

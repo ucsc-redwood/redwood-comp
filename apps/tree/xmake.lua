@@ -43,18 +43,18 @@ target("app-tree")
     --   add_packages("vulkan-hpp", "vulkan-memory-allocator")
     -- end
 
--- target("bm-cifar-dense-cpu")
---     set_kind("binary")
---     add_includedirs("$(projectdir)")
---     add_headerfiles("*.hpp", "host/*.hpp")
---     add_files("bm_pinned.cpp", "host/*.cpp", "app_data.cpp")
---     add_packages("spdlog", "cli11", "yaml-cpp")
---     add_deps("cpu-backend")
---     if is_plat("android") then
---       on_run(run_on_android)
---     end
+target("bm-tree-cpu")
+    set_kind("binary")
+    add_includedirs("$(projectdir)")
+    add_headerfiles("*.hpp", "host/*.hpp")
+    add_files("bm_cpu.cpp", "host/*.cpp")
+    add_packages("spdlog", "cli11", "yaml-cpp")
+    add_deps("cpu-backend")
+    if is_plat("android") then
+      on_run(run_on_android)
+    end
 
---     add_packages("benchmark")
+    add_packages("benchmark")
 
 -- if has_config("vulkan-backend") then
 
