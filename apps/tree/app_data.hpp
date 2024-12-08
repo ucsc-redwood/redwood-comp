@@ -25,9 +25,10 @@ struct AppData final : public BaseAppData {
         u_edge_count(n_input, mr),
         u_edge_offset(n_input, mr),
         brt(n_input, mr),
-        oct(n_input * k_memory_ratio, mr),
-        u_contributes(n_input, mr),
-        u_out_idx(n_input, mr) {
+        oct(n_input * k_memory_ratio, mr)
+  // u_contributes(n_input, mr),
+  // u_out_idx(n_input, mr)
+  {
     constexpr auto seed = 114514;
 
     std::mt19937 gen(seed);
@@ -68,8 +69,6 @@ struct AppData final : public BaseAppData {
           u_parents(n_nodes, mr) {}
 
     UsmVector<uint8_t> u_prefix_n;
-    // UsmVector<bool> u_has_leaf_left;
-    // UsmVector<bool> u_has_leaf_right;
     UsmVector<uint8_t> u_has_leaf_left;
     UsmVector<uint8_t> u_has_leaf_right;
     UsmVector<int32_t> u_left_child;
@@ -98,8 +97,8 @@ struct AppData final : public BaseAppData {
   // --------------------------------------------------------------------------
   // Intermediate data
   // --------------------------------------------------------------------------
-  UsmVector<uint32_t> u_contributes;
-  UsmVector<uint32_t> u_out_idx;
+  // UsmVector<uint32_t> u_contributes;
+  // UsmVector<uint32_t> u_out_idx;
 
   // --------------------------------------------------------------------------
   // Getters

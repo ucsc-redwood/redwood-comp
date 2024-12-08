@@ -23,6 +23,11 @@ void run_cpu_demo(const std::vector<int>& cores, const size_t input_size) {
   core::thread_pool pool(cores);
   cpu::run_stage1(app_data, pool, n_threads);
   cpu::run_stage2(app_data, pool, n_threads);
+
+  if (!std::ranges::is_sorted(app_data.u_morton_keys)) {
+    spdlog::error("Morton keys are not sorted");
+  }
+
   cpu::run_stage3(app_data, pool, n_threads);
   cpu::run_stage4(app_data, pool, n_threads);
   cpu::run_stage5(app_data, pool, n_threads);
@@ -48,6 +53,10 @@ void run_cuda_demo(const size_t input_size) {
   AppData app_data(&mr, input_size);
 
   cuda::run_stage1(app_data, stream);
+  cuda::run_stage2(app_data, stream);
+  if (!std::ranges::is_sorted(app_data.u_morton_keys)) {
+    spdlog::error("Morton keys are not sorted");
+  }
 
   // // peek 10 morton codes
   // for (int i = 0; i < 10; ++i) {
