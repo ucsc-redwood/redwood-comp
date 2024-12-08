@@ -54,15 +54,19 @@ void run_cpu_demo(const std::vector<int>& cores, const size_t n_threads) {
 
 #ifdef REDWOOD_VULKAN_BACKEND
 
-#include "redwood/vulkan/engine.hpp"
+// #include "redwood/vulkan/engine.hpp"
 #include "vulkan/vk_dispatcher.hpp"
 
 void run_vulkan_demo() {
   vulkan::Engine engine;
   AppData app_data(engine.get_mr());
 
-  vulkan::run_stage1(engine, app_data);
-  vulkan::run_stage2(engine, app_data);
+  vulkan::Dispatcher dispatcher(engine, app_data);
+
+  auto seq = engine.sequence();
+
+  dispatcher.run_stage1(seq.get());
+  dispatcher.run_stage2(seq.get());
 }
 
 #endif
