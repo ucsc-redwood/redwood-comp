@@ -54,21 +54,15 @@ void run_cpu_demo(const std::vector<int>& cores, const size_t n_threads) {
 
 #ifdef REDWOOD_VULKAN_BACKEND
 
-// #include "redwood/vulkan/vk_allocator.hpp"
-
 #include "redwood/vulkan/engine.hpp"
 #include "vulkan/vk_dispatcher.hpp"
 
-// void run_vulkan_demo() {
-//   vulkan::Engine engine;
+void run_vulkan_demo() {
+  vulkan::Engine engine;
+  AppData app_data(engine.get_mr());
 
-//   {
-//     vulkan::VulkanMemoryResource vk_mr(engine);
-//     AppData app_data(&vk_mr);
-//     vulkan::run_stage1(engine, app_data);
-//   }
-
-// }
+  vulkan::run_stage1(engine, app_data);
+}
 
 #endif
 
@@ -80,24 +74,14 @@ int main(int argc, char** argv) {
 
   assert(!small_cores.empty());
 
-  // spdlog::info("Small cores: [{}]", fmt::join(small_cores, ", "));
-  // spdlog::info("Medium cores: [{}]", fmt::join(medium_cores, ", "));
-  // spdlog::info("Big cores: [{}]", fmt::join(big_cores, ", "));
-
   spdlog::set_level(spdlog::level::trace);
 
   run_cpu_demo(small_cores, small_cores.size());
 
-  // if constexpr (is_backend_enabled(BackendType::kVulkan)) {
-  //   spdlog::info("Vulkan backend is enabled");
-  //   run_vulkan_demo();
-  // }
-
-  vulkan::Engine engine;
-
-  // vulkan::VulkanMemoryResource vk_mr(engine);
-  AppData app_data(engine.get_mr());
-  vulkan::run_stage1(engine, app_data);
+  if constexpr (is_backend_enabled(BackendType::kVulkan)) {
+    spdlog::info("Vulkan backend is enabled");
+    run_vulkan_demo();
+  }
 
   spdlog::info("Done");
   return EXIT_SUCCESS;
