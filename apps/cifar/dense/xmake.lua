@@ -54,12 +54,9 @@ target("bm-cifar-dense-vk")
 
     add_packages("benchmark")
 
-    -- Vulkan related (optional)
-    if has_config("vulkan-backend") then
-      add_defines("REDWOOD_VULKAN_BACKEND")
-      add_headerfiles("vulkan/*.hpp")
-      add_files("vulkan/*.cpp")      
-      add_deps("vk-backend")
-      add_packages("vulkan-hpp", "vulkan-memory-allocator")
-    end
+    add_defines("REDWOOD_VULKAN_BACKEND")
+    add_headerfiles("vulkan/*.hpp")
+    add_files("vulkan/*.cpp")      
+    add_deps("vk-backend")
+    add_packages("vulkan-hpp", "vulkan-memory-allocator")
 
