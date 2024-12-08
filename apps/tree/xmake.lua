@@ -23,13 +23,13 @@ target("app-tree")
     end
 
     -- CUDA related (optional)
-    -- if has_config("cuda-backend") then
+    if has_config("cuda-backend") then
       add_defines("REDWOOD_CUDA_BACKEND")
       add_deps("cu-backend")
       add_headerfiles("cuda/**/*.cuh")
       add_files(cu_source_files)
       add_cugencodes("native")
-    -- end
+    end
 
     -- -- Vulkan related (optional)
     -- if has_config("vulkan-backend") then
