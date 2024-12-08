@@ -1,3 +1,5 @@
+#include <cub/util_math.cuh>
+
 #include "im_storage.cuh"
 #include "redwood/cuda/helpers.cuh"
 
@@ -24,7 +26,8 @@ constexpr void malloc_device(T** ptr, const size_t num_items) {
   CUDA_CHECK(cudaMemsetAsync(           \
       ptr, 0, sizeof(std::remove_pointer_t<decltype(ptr)>) * (item_count)))
 
-ImStorage::ImStorage(const int n) {
+ImStorage::ImStorage(const int n)
+    : binning_blocks(cub::DivideAndRoundUp(n, BIN_PART_SIZE)) {
   // binning_blocks = 270 usually (w/ ~2M points)
   MALLOC_DEVICE(&d_global_histogram, RADIX * RADIX_PASSES);
   MALLOC_DEVICE(&d_index, RADIX_PASSES);
