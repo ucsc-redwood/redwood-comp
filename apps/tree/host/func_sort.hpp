@@ -2,6 +2,8 @@
 
 #include <barrier>
 
+#include "redwood/host/thread_pool.hpp"
+
 namespace cpu {
 
 namespace kernels {
@@ -13,13 +15,13 @@ void k_binning_pass(const size_t tid,
                     uint32_t* u_sort_alt,  // output
                     const int shift);
 
-// core::multi_future<void> dispatch_binning_pass(const int n_bins,
-//                                                const int n_points,
-//                                                const int *bin_indices,
-//                                                const float *points,
-//                                                const float *bin_min,
-//                                                const float *bin_max,
-//                                                int *bin_counts);
+core::multi_future<void> dispatch_binning_pass(core::thread_pool& pool,
+                                               const size_t n_threads,
+                                               std::barrier<>& barrier,
+                                               const int n,
+                                               const uint32_t* u_sort,
+                                               uint32_t* u_sort_alt,
+                                               const int shift);
 
 }  // namespace kernels
 

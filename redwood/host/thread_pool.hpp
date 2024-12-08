@@ -130,6 +130,7 @@ class thread_pool {
     return future;
   }
 
+  // No thread id
   template <typename T,
             typename F,
             typename R = std::invoke_result_t<std::decay_t<F>, T, T>>
@@ -159,6 +160,39 @@ class thread_pool {
     }
     return future_collection;
   }
+
+  // // With thread id
+  // template <typename T,
+  //           typename F,
+  //           typename R = std::invoke_result_t<std::decay_t<F>, T, T, T>>
+  // [[nodiscard]] multi_future<R> submit_blocks_with_tid(
+  //     const T first_index,
+  //     const T index_after_last,
+  //     F &&block,
+  //     const size_t num_blocks = 0) {
+  //   multi_future<R> future_collection;
+
+  //   if (index_after_last > first_index) {
+  //     size_t M = num_blocks ? num_blocks : workers.size();
+  //     T block_size = (index_after_last - first_index + M - 1) / M;  // Round
+  //     up
+
+  //     for (size_t i = 0; i < M; ++i) {
+  //       T start = first_index + i * block_size;
+  //       T end = std::min(start + block_size, index_after_last);
+
+  //       if (start >= index_after_last) break;
+
+  //       // Submit each block as a separate task and add the future to
+  //       // multi_future
+  //       future_collection.add(
+  //           submit_task([block = std::forward<F>(block), start, end, i] {
+  //             return block(start, end, i);
+  //           }));
+  //     }
+  //   }
+  //   return future_collection;
+  // }
 
  private:
   std::vector<std::thread> workers;

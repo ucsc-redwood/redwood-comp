@@ -3,6 +3,7 @@
 #include "../cli_to_config.hpp"
 #include "../read_config.hpp"
 #include "app_data.hpp"
+#include "host/host_dispatchers.hpp"
 
 int main(int argc, char** argv) {
   auto config = helpers::init_demo(argc, argv);
@@ -17,6 +18,21 @@ int main(int argc, char** argv) {
   constexpr auto n = 640 * 480;  // = 307200
 
   AppData app_data(std::pmr::new_delete_resource(), n);
+
+  core::thread_pool pool(small_cores);
+  cpu::run_stage1(app_data, pool, small_cores.size());
+  cpu::run_stage2(app_data, pool, small_cores.size());
+
+  // print the first 10 sorted morton keys
+  for (auto i = 0; i < 10; ++i) {
+    spdlog::info("u_morton_keys[{}] = {}", i, app_data.u_morton_keys[i]);
+  }
+
+  if (!std::ranges::is_sorted(app_data.u_morton_keys)) {
+    spdlog::error("u_morton_keys is not sorted!");
+  } else {
+    spdlog::info("u_morton_keys is sorted.");
+  }
 
   spdlog::info("Done.");
   return 0;
