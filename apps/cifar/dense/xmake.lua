@@ -41,7 +41,7 @@ target("bm-cifar-dense-cpu")
 
     add_packages("benchmark")
 
--- if has_config("vulkan-backend") then
+if has_config("vulkan-backend") then
 
 target("bm-cifar-dense-vk")
     set_kind("binary")
@@ -63,5 +63,5 @@ target("bm-cifar-dense-vk")
     add_packages("vulkan-hpp", "vulkan-memory-allocator")
 target_end()
 
--- end
+end
 
