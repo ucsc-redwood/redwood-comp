@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cstdint>
 #include <glm/glm.hpp>
 #include <random>
 #include <stdexcept>
@@ -66,8 +67,10 @@ struct AppData final : public BaseAppData {
           u_parents(n_nodes, mr) {}
 
     UsmVector<uint8_t> u_prefix_n;
-    UsmVector<bool> u_has_leaf_left;
-    UsmVector<bool> u_has_leaf_right;
+    // UsmVector<bool> u_has_leaf_left;
+    // UsmVector<bool> u_has_leaf_right;
+    UsmVector<uint8_t> u_has_leaf_left;
+    UsmVector<uint8_t> u_has_leaf_right;
     UsmVector<int32_t> u_left_child;
     UsmVector<int32_t> u_parents;
   } brt;
@@ -112,6 +115,9 @@ struct AppData final : public BaseAppData {
   }
 
   void set_n_unique(const uint32_t n_unique) { this->n_unique = n_unique; }
+  void set_n_brt_nodes(const uint32_t n_brt_nodes) {
+    this->n_brt_nodes = n_brt_nodes;
+  }
 
   [[nodiscard]] uint32_t get_n_brt_nodes() const {
     return this->get_n_unique() - 1;
@@ -134,13 +140,18 @@ struct AppData final : public BaseAppData {
   // after calling sort, 'u_morton_keys_alt' is sorted
   // after calling move_dups, 'u_morton_keys' is sorted and unique
   // there's no way to check if you called, so I trust you call them in order
-  UsmVector<uint32_t>& get_sorted_morton_keys() { return u_morton_keys_alt; }
-  const UsmVector<uint32_t>& get_sorted_morton_keys() const {
-    return u_morton_keys_alt;
+
+  [[nodiscard]] uint32_t* get_sorted_morton_keys() {
+    return u_morton_keys_alt.data();
+  }
+  [[nodiscard]] const uint32_t* get_sorted_morton_keys() const {
+    return u_morton_keys_alt.data();
   }
 
-  UsmVector<uint32_t>& get_unique_morton_keys() { return u_morton_keys; }
-  const UsmVector<uint32_t>& get_unique_morton_keys() const {
-    return u_morton_keys;
+  [[nodiscard]] uint32_t* get_unique_morton_keys() {
+    return u_morton_keys.data();
+  }
+  [[nodiscard]] const uint32_t* get_unique_morton_keys() const {
+    return u_morton_keys.data();
   }
 };

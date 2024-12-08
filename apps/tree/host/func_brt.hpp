@@ -6,6 +6,8 @@
 
 namespace cpu {
 
+using FakeBool = uint8_t;
+
 namespace kernels {
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -45,8 +47,8 @@ inline void process_radix_tree_i(const int i,
                                  const uint32_t* codes,
                                  //  const RadixTree* out_brt
                                  uint8_t* brt_prefix_n,
-                                 bool* brt_has_leaf_left,
-                                 bool* brt_has_leaf_right,
+                                 FakeBool* brt_has_leaf_left,
+                                 FakeBool* brt_has_leaf_right,
                                  int32_t* brt_left_child,
                                  int32_t* brt_parents) {
   // 'i' is the iterator within a chunk

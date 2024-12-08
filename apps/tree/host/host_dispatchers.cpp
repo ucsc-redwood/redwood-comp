@@ -177,4 +177,65 @@ void run_stage2(AppData& app_data,
       .wait();
 }
 
+// ----------------------------------------------------------------------------
+// Stage 3 (sorted morton -> unique morton)
+// ----------------------------------------------------------------------------
+
+void run_stage3(AppData& app_data,
+                [[maybe_unused]] core::thread_pool& pool,
+                [[maybe_unused]] const size_t n_threads) {
+  //   const auto from = app_data.get_sorted_morton_keys();
+  //   const auto to = app_data.get_unique_morton_keys();
+  //   const auto n = app_data.get_n_input();
+
+  //   spdlog::debug("[cpu] run_stage3 unique_copy: {} items", n);
+
+  //   const auto last = std::unique_copy(from, from + n, to);
+
+  //   const auto n_unique = std::distance(to, last);
+
+  const auto last =
+      std::unique_copy(app_data.u_morton_keys.data(),
+                       app_data.u_morton_keys.data() + app_data.get_n_input(),
+                       app_data.u_morton_keys_alt.data());
+  const auto n_unique = std::distance(app_data.u_morton_keys_alt.data(), last);
+
+  app_data.set_n_unique(n_unique);
+  app_data.set_n_brt_nodes(n_unique - 1);
+}
+
+// ----------------------------------------------------------------------------
+// Stage 4 (unique morton -> brt)
+// ----------------------------------------------------------------------------
+
+void run_stage4(AppData& app_data,
+                core::thread_pool& pool,
+                const size_t n_threads) {
+  const int start = 0;
+  const int end = app_data.get_n_unique();
+
+  spdlog::debug("[cpu] run_stage4 process_radix_tree: {} items with {} threads",
+                end,
+                n_threads);
+
+  pool.submit_blocks(
+          start,
+          end,
+          [&](const int start, const int end) {
+            for (int i = start; i < end; ++i) {
+              kernels::process_radix_tree_i(
+                  i,
+                  app_data.get_n_brt_nodes(),
+                  app_data.get_unique_morton_keys(),
+                  app_data.brt.u_prefix_n.data(),
+                  app_data.brt.u_has_leaf_left.data(),
+                  app_data.brt.u_has_leaf_right.data(),
+                  app_data.brt.u_left_child.data(),
+                  app_data.brt.u_parents.data());
+            }
+          },
+          n_threads)
+      .wait();
+}
+
 }  // namespace cpu
