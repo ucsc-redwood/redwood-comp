@@ -5,6 +5,7 @@
 
 #include "algorithm.hpp"
 #include "base_engine.hpp"
+#include "sequence.hpp"
 #include "vma_pmr.hpp"
 
 struct VulkanEngine {
@@ -21,6 +22,14 @@ struct VulkanEngine {
         mr_ptr.get(), comp_name, buffers);
   }
 
+  [[nodiscard]]
+  std::shared_ptr<vulkan::Sequence> sequence() {
+    return std::make_shared<vulkan::Sequence>(
+        base_engine.get_device(),
+        base_engine.get_compute_queue(),
+        base_engine.get_compute_queue_family_index());
+  }
+
   vulkan::BaseEngine base_engine;
   std::unique_ptr<VulkanMemoryResource> mr_ptr;
 };
@@ -34,9 +43,6 @@ int main() {
   std::pmr::vector<float> vec1(n, engine.mr_ptr.get());
   std::pmr::vector<float> vec2(n, engine.mr_ptr.get());
   std::pmr::vector<float> vec3(n, engine.mr_ptr.get());
-
-  std::cout << "vec1 size address: " << (void *)vec1.data() << std::endl;
-  std::cout << "vec2 size address: " << (void *)vec2.data() << std::endl;
 
   std::ranges::fill(vec1, 1.0f);
   std::ranges::fill(vec2, 2.0f);
@@ -56,24 +62,19 @@ int main() {
                   ->set_push_constants<PushConstants>({n})
                   ->build();
 
-  // auto algo = std::make_shared<vulkan::Algorithm>(
-  //                 engine.mr,
-  //                 "hello_vector_add.comp",
-  //                 std::vector{vec1_buffer, vec2_buffer, vec3_buffer})
-  //                 ->set_push_constants<PushConstants>({n})
-  //                 ->build();
+  auto seq = engine.sequence();
 
-  // auto algo_ptr = std::shared_ptr<vulkan::Algorithm>(&algo);
+  seq->record_commands(algo.get(), n);
+  seq->launch_kernel_async();
 
-  // algo_ptr->set_push_constants<PushConstants>({n})->build();
+  seq->sync();
 
-  // auto algo = engine
-  // auto algo = engine
-  //                 .algorithm("hello_vector_add.comp",
-  //                            std::vector{vec1_buffer, vec2_buffer,
-  //                            vec3_buffer})
-  //                 ->set_push_constants<PushConstants>({n})
-  //                 ->build();
+  // print first 10 elements of vec3
+  std::cout << "vec3: ";
+  for (size_t i = 0; i < 10; ++i) {
+    std::cout << vec3[i] << " ";
+  }
+  std::cout << std::endl;
 
   return 0;
 }

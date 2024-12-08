@@ -37,6 +37,10 @@ class BaseEngine {
   // }
 
   [[nodiscard]] vk::Device &get_device() { return device_; }
+  [[nodiscard]] vk::Queue &get_compute_queue() { return compute_queue_; }
+  [[nodiscard]] uint32_t get_compute_queue_family_index() const {
+    return compute_queue_family_index_;
+  }
 
   // /**
   //  * @brief Get the compute queue
