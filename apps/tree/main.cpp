@@ -24,6 +24,9 @@ int main(int argc, char** argv) {
   cpu::run_stage2(app_data, pool, small_cores.size());
   cpu::run_stage3(app_data, pool, small_cores.size());
   cpu::run_stage4(app_data, pool, small_cores.size());
+  cpu::run_stage5(app_data, pool, small_cores.size());
+  cpu::run_stage6(app_data, pool, small_cores.size());
+  cpu::run_stage7(app_data, pool, small_cores.size());
 
   // print the first 10 sorted morton keys
   for (auto i = 0; i < 10; ++i) {
@@ -38,6 +41,18 @@ int main(int argc, char** argv) {
   } else {
     spdlog::error("u_morton_keys is not sorted!");
   }
+
+  // print 10 edge_offset
+  for (auto i = 0; i < 10; ++i) {
+    spdlog::info("u_edge_offset[{}] = {}", i, app_data.u_edge_offset[i]);
+  }
+
+  // print num_unique, num_brt, num_octree_nodes. For num oct, print percentage
+  // of all allocated
+
+  spdlog::info("num_unique = {}", app_data.get_n_unique());
+  spdlog::info("num_brt = {}", app_data.get_n_brt_nodes());
+  spdlog::info("num_octree_nodes = {}", app_data.get_n_octree_nodes());
 
   spdlog::info("Done.");
   return 0;

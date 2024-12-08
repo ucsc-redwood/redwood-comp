@@ -20,9 +20,6 @@ void run_stage1(AppData& app_data,
   const int start = 0;
   const int end = app_data.get_n_input();
 
-  constexpr float min_coord = 0.0f;
-  constexpr float range = 1024.0f;
-
   // spd log, show kernel name, number of threads, number of items
   spdlog::debug("[cpu] run_stage1 xyz_to_morton32: {} threads, {} items",
                 n_threads,
@@ -33,8 +30,10 @@ void run_stage1(AppData& app_data,
           end,
           [&](const int start, const int end) {
             for (int i = start; i < end; ++i) {
-              app_data.u_morton_keys[i] = kernels::xyz_to_morton32(
-                  app_data.u_input_points[i], min_coord, range);
+              app_data.u_morton_keys[i] =
+                  kernels::xyz_to_morton32(app_data.u_input_points[i],
+                                           app_data.min_coord,
+                                           app_data.range);
             }
           },
           n_threads)
@@ -184,16 +183,6 @@ void run_stage2(AppData& app_data,
 void run_stage3(AppData& app_data,
                 [[maybe_unused]] core::thread_pool& pool,
                 [[maybe_unused]] const size_t n_threads) {
-  //   const auto from = app_data.get_sorted_morton_keys();
-  //   const auto to = app_data.get_unique_morton_keys();
-  //   const auto n = app_data.get_n_input();
-
-  //   spdlog::debug("[cpu] run_stage3 unique_copy: {} items", n);
-
-  //   const auto last = std::unique_copy(from, from + n, to);
-
-  //   const auto n_unique = std::distance(to, last);
-
   const auto last =
       std::unique_copy(app_data.u_morton_keys.data(),
                        app_data.u_morton_keys.data() + app_data.get_n_input(),
@@ -232,6 +221,114 @@ void run_stage4(AppData& app_data,
                   app_data.brt.u_has_leaf_right.data(),
                   app_data.brt.u_left_child.data(),
                   app_data.brt.u_parents.data());
+            }
+          },
+          n_threads)
+      .wait();
+}
+
+// ----------------------------------------------------------------------------
+// Stage 5 (brt -> edge count)
+// ----------------------------------------------------------------------------
+
+void run_stage5(AppData& app_data,
+                core::thread_pool& pool,
+                const size_t n_threads) {
+  const int start = 0;
+  const int end = app_data.get_n_brt_nodes();
+
+  spdlog::debug("[cpu] run_stage5 process_edge_count: {} items with {} threads",
+                end,
+                n_threads);
+
+  pool.submit_blocks(
+          start,
+          end,
+          [&](const int start, const int end) {
+            for (int i = start; i < end; ++i) {
+              kernels::process_edge_count_i(i,
+                                            app_data.brt.u_prefix_n.data(),
+                                            app_data.brt.u_parents.data(),
+                                            app_data.u_edge_count.data());
+            }
+          },
+          n_threads)
+      .wait();
+}
+
+// ----------------------------------------------------------------------------
+// Stage 6 (edge count -> edge offset)
+// ----------------------------------------------------------------------------
+
+void run_stage6(AppData& app_data,
+                core::thread_pool& pool,
+                const size_t n_threads) {
+  const int start = 0;
+  const int end = app_data.get_n_brt_nodes();
+
+  //   pool.submit_task([p]() {
+  //         std::partial_sum(p->u_edge_counts,
+  //                          p->u_edge_counts + p->n_brt_nodes(),
+  //                          p->u_edge_offsets);
+  //         return p->u_edge_offsets[p->brt.n_nodes() - 1];
+  //       })
+  //       .wait();
+
+  spdlog::debug(
+      "[cpu] run_stage6 process_edge_offset: {} items with {} threads",
+      end,
+      n_threads);
+
+  pool.submit_blocks(
+          start,
+          end,
+          [&](const int start, const int end) {
+            std::partial_sum(app_data.u_edge_count.data() + start,
+                             app_data.u_edge_count.data() + end,
+                             app_data.u_edge_offset.data() + start);
+          },
+          n_threads)
+      .wait();
+
+  // num_octree node is the result of the partial sum
+  const auto num_octree_nodes = app_data.u_edge_offset[end - 1];
+
+  app_data.set_n_octree_nodes(num_octree_nodes);
+}
+
+// ----------------------------------------------------------------------------
+// Stage 7 (everything -> octree)
+// ----------------------------------------------------------------------------
+
+void run_stage7(AppData& app_data,
+                core::thread_pool& pool,
+                const size_t n_threads) {
+  // note: 1 here, skipping root
+  const int start = 1;
+  const int end = app_data.get_n_octree_nodes();
+
+  spdlog::debug("[cpu] run_stage7 process_octree: {} items with {} threads",
+                end,
+                n_threads);
+
+  pool.submit_blocks(
+          start,
+          end,
+          [&](const int start, const int end) {
+            for (int i = start; i < end; ++i) {
+              kernels::process_oct_node(
+                  i,
+                  reinterpret_cast<int(*)[8]>(app_data.oct.u_children.data()),
+                  app_data.oct.u_corner.data(),
+                  app_data.oct.u_cell_size.data(),
+                  app_data.oct.u_child_node_mask.data(),
+                  app_data.u_edge_offset.data(),
+                  app_data.u_edge_count.data(),
+                  app_data.get_unique_morton_keys(),
+                  app_data.brt.u_prefix_n.data(),
+                  app_data.brt.u_parents.data(),
+                  app_data.min_coord,
+                  app_data.range);
             }
           },
           n_threads)

@@ -13,6 +13,9 @@
 constexpr auto k_memory_ratio = 0.6f;
 
 struct AppData final : public BaseAppData {
+  static constexpr auto min_coord = 0.0f;
+  static constexpr auto range = 1024.0f;
+
   explicit AppData(std::pmr::memory_resource* mr, const size_t n_input)
       : BaseAppData(mr),
         n_input(n_input),
@@ -26,8 +29,6 @@ struct AppData final : public BaseAppData {
         u_contributes(n_input, mr),
         u_out_idx(n_input, mr) {
     constexpr auto seed = 114514;
-    constexpr auto min_coord = 0.0f;
-    constexpr auto range = 1024.0f;
 
     std::mt19937 gen(seed);
     std::uniform_real_distribution dis(min_coord, min_coord + range);
