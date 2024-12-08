@@ -64,10 +64,10 @@ void run_stage1(Engine &engine, AppData &app_data) {
       engine
           .algorithm("cifar_conv2d.comp",
                      {
-                         engine.get_vk_buffer(app_data.u_conv1_out.data()),
-                         engine.get_vk_buffer(app_data.u_conv2_weights.data()),
-                         engine.get_vk_buffer(app_data.u_conv2_bias.data()),
-                         engine.get_vk_buffer(app_data.u_conv2_out.data()),
+                         engine.get_buffer(app_data.u_conv1_out.data()),
+                         engine.get_buffer(app_data.u_conv2_weights.data()),
+                         engine.get_buffer(app_data.u_conv2_bias.data()),
+                         engine.get_buffer(app_data.u_conv2_out.data()),
                      })
           ->set_push_constants<PushConstants>({
               .input_height = model::kInputHeight,
