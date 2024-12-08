@@ -26,6 +26,23 @@ __global__ void conv2d(const float* __restrict__ input_data,
                        int output_width,
                        bool relu);
 
+__global__ void maxpool2d(const float* __restrict__ input_data,
+                          float* __restrict__ output_data,
+                          int input_channels,
+                          int input_height,
+                          int input_width,
+                          int pool_size,
+                          int stride,
+                          int output_height,
+                          int output_width);
+
+__global__ void linear(const float* __restrict__ input_data,
+                       const float* __restrict__ weight_data,
+                       const float* __restrict__ bias_data,
+                       float* __restrict__ output_data,
+                       int input_size,
+                       int output_size);
+
 }  // namespace dense
 
 }  // namespace kernels

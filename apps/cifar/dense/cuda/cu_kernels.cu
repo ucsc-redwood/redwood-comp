@@ -82,6 +82,78 @@ __global__ void conv2d(const float* __restrict__ input_data,
   output_data[output_index] = sum;
 }
 
+__global__ void maxpool2d(const float* __restrict__ input_data,
+                          float* __restrict__ output_data,
+                          const int input_channels,
+                          const int input_height,
+                          const int input_width,
+                          const int pool_size,
+                          const int stride,
+                          const int output_height,
+                          const int output_width) {
+  int global_idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+  // Total number of output elements
+  int total_output_elements = input_channels * output_height * output_width;
+  if (global_idx >= total_output_elements) return;
+
+  // Compute channel, output height (h), and output width (w) from the flat
+  // index
+  int c = global_idx / (output_height * output_width);
+  int hw_idx = global_idx % (output_height * output_width);
+  int h = hw_idx / output_width;
+  int w = hw_idx % output_width;
+
+  float max_val = -3.402823466e+38f;  // -FLT_MAX
+
+  // Compute the region of the input image that this output element covers
+  for (int ph = 0; ph < pool_size; ++ph) {
+    for (int pw = 0; pw < pool_size; ++pw) {
+      int input_h = h * stride + ph;
+      int input_w = w * stride + pw;
+
+      // Check boundaries
+      if (input_h < input_height && input_w < input_width) {
+        int input_index =
+            c * (input_height * input_width) + input_h * input_width + input_w;
+        float val = input_data[input_index];
+        max_val = (val > max_val) ? val : max_val;
+      }
+    }
+  }
+
+  // Write result to output
+  int output_index = c * (output_height * output_width) + h * output_width + w;
+  output_data[output_index] = max_val;
+}
+
+__global__ void linear(const float* __restrict__ input_data,
+                       const float* __restrict__ weight_data,
+                       const float* __restrict__ bias_data,
+                       float* __restrict__ output_data,
+                       const int input_size,
+                       const int output_size) {
+  int global_idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+  // Check if this thread corresponds to a valid output element
+  if (global_idx >= output_size) return;
+
+  // Compute the output element: sum over the input dimension
+  float sum = 0.0f;
+  int weight_start =
+      global_idx *
+      input_size;  // Starting index of weights for this output neuron
+  for (int j = 0; j < input_size; ++j) {
+    sum += input_data[j] * weight_data[weight_start + j];
+  }
+
+  // Add bias
+  sum += bias_data[global_idx];
+
+  // Store the result
+  output_data[global_idx] = sum;
+}
+
 }  // namespace dense
 
 }  // namespace kernels
