@@ -43,6 +43,8 @@ void run_stage2(AppData &app_data,
                 const cudaStream_t stream) {
   const auto n = app_data.get_n_input();
 
+  im_storage.clearSmem();
+
   const auto smem = 0;
   constexpr auto grid_size = 16;
 

@@ -52,8 +52,11 @@ void run_cuda_demo(const size_t input_size) {
   cuda::CudaMemoryResource mr;
   AppData app_data(&mr, input_size);
 
+  // Allocate device memory for the sorting stage
+  cuda::ImStorage im_storage(input_size);
+
   cuda::run_stage1(app_data, stream);
-  cuda::run_stage2(app_data, stream);
+  cuda::run_stage2(app_data, im_storage, stream);
   if (!std::ranges::is_sorted(app_data.u_morton_keys)) {
     spdlog::error("Morton keys are not sorted");
   }
