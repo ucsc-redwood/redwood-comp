@@ -34,6 +34,11 @@ struct Dispatcher {
     uint32_t output_width;
   };
 
+  struct LinearPushConstants {
+    uint32_t in_features;
+    uint32_t out_features;
+  };
+
   void run_stage1(Sequence *seq);
   void run_stage2(Sequence *seq);
   void run_stage3(Sequence *seq);

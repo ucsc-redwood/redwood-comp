@@ -54,7 +54,6 @@ void run_cpu_demo(const std::vector<int>& cores, const size_t n_threads) {
 
 #ifdef REDWOOD_VULKAN_BACKEND
 
-// #include "redwood/vulkan/engine.hpp"
 #include "vulkan/vk_dispatcher.hpp"
 
 void run_vulkan_demo() {
@@ -67,6 +66,15 @@ void run_vulkan_demo() {
 
   dispatcher.run_stage1(seq.get());
   dispatcher.run_stage2(seq.get());
+  dispatcher.run_stage3(seq.get());
+  dispatcher.run_stage4(seq.get());
+  dispatcher.run_stage5(seq.get());
+  dispatcher.run_stage6(seq.get());
+  dispatcher.run_stage7(seq.get());
+  dispatcher.run_stage8(seq.get());
+  dispatcher.run_stage9(seq.get());
+
+  print_prediction(arg_max(app_data.u_linear_out.data()));
 }
 
 #endif
