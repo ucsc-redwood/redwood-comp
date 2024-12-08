@@ -1,10 +1,9 @@
 #include "algorithm.hpp"
 
-#include <spdlog/spdlog.h>
-
 #include <shaderc/shaderc.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
+#include "../utils.hpp"
 #include "shader_loader.hpp"
 #include "spirv_reflect.h"
 
@@ -14,16 +13,13 @@ namespace vulkan {
 // Constructor
 // ----------------------------------------------------------------------------
 
-Algorithm::Algorithm(  // VulkanMemoryResource& mr,
-                       // std::shared_ptr<VulkanMemoryResource> mr_ptr,
-    VulkanMemoryResource* mr_ptr,
-    const std::string_view shader_path,
-    const std::vector<vk::Buffer>& buffers)
-    : device_ref_(mr_ptr->get_device()),
-      mr_ptr_(mr_ptr),
+Algorithm::Algorithm(std::shared_ptr<vk::Device> device_ptr,
+                     const std::string_view shader_path,
+                     const BufferVec& buffers)
+    : VulkanResource(std::move(device_ptr)),
       shader_path_(shader_path),
       usm_buffers_(buffers) {
-  SPDLOG_TRACE("Algorithm constructor");
+  SPD_TRACE_FUNC
 
   // load, compile, and reflect the shader.
   load_and_compile_shader();
@@ -43,7 +39,7 @@ Algorithm::Algorithm(  // VulkanMemoryResource& mr,
 }
 
 std::shared_ptr<Algorithm> Algorithm::build() {
-  SPDLOG_TRACE("Algorithm build");
+  SPD_TRACE_FUNC
 
   if (has_push_constants()) {
     if (push_constants_ptr_ == nullptr) {
@@ -61,7 +57,7 @@ std::shared_ptr<Algorithm> Algorithm::build() {
 // Destructor
 // ----------------------------------------------------------------------------
 
-void Algorithm::destroy() { SPDLOG_TRACE("Algorithm destroy"); }
+void Algorithm::destroy(){SPD_TRACE_FUNC}
 
 // ----------------------------------------------------------------------------
 // Compile shader to SPIRV
@@ -102,7 +98,7 @@ std::vector<uint32_t> compileShaderToSPIRV(const std::string_view filepath) {
 // ----------------------------------------------------------------------------
 
 void Algorithm::post_compile_reflection() {
-  SPDLOG_TRACE("Algorithm post_compile_reflection");
+  SPD_TRACE_FUNC
 
   if (internal_.spirv_binary_.empty()) {
     throw std::runtime_error("Shader binary is empty, maybe not compiled?");
@@ -195,7 +191,7 @@ void Algorithm::post_compile_reflection() {
 // ----------------------------------------------------------------------------
 
 void Algorithm::load_and_compile_shader() {
-  SPDLOG_TRACE("Algorithm load_and_compile_shader");
+  SPD_TRACE_FUNC
 
   if (shader_path_.empty()) {
     throw std::runtime_error("Shader path is empty");
@@ -209,7 +205,7 @@ void Algorithm::load_and_compile_shader() {
 // ----------------------------------------------------------------------------
 
 void Algorithm::create_shader_module() {
-  SPDLOG_TRACE("Algorithm create_shader_module");
+  SPD_TRACE_FUNC
 
   if (internal_.spirv_binary_.empty()) {
     throw std::runtime_error("Shader binary is empty");
@@ -220,7 +216,7 @@ void Algorithm::create_shader_module() {
       .pCode = internal_.spirv_binary_.data(),
   };
 
-  shader_module_ = device_ref_.createShaderModule(create_info);
+  handle_ = device_ptr_->createShaderModule(create_info);
 
   spdlog::debug("Shader module [{}] created successfully", shader_path_);
 }
@@ -230,7 +226,7 @@ void Algorithm::create_shader_module() {
 // ----------------------------------------------------------------------------
 
 void Algorithm::create_descriptor_pool() {
-  SPDLOG_TRACE("Algorithm create_descriptor_pool");
+  SPD_TRACE_FUNC
 
   const std::vector pool_sizes{
       vk::DescriptorPoolSize{
@@ -245,7 +241,7 @@ void Algorithm::create_descriptor_pool() {
       .pPoolSizes = pool_sizes.data(),
   };
 
-  descriptor_pool_ = device_ref_.createDescriptorPool(create_info);
+  descriptor_pool_ = device_ptr_->createDescriptorPool(create_info);
 }
 
 // ----------------------------------------------------------------------------
@@ -253,7 +249,7 @@ void Algorithm::create_descriptor_pool() {
 // ----------------------------------------------------------------------------
 
 void Algorithm::create_descriptor_set_layout() {
-  SPDLOG_TRACE("Algorithm create_descriptor_set_layout");
+  SPD_TRACE_FUNC
 
   std::vector<vk::DescriptorSetLayoutBinding> bindings;
   bindings.reserve(usm_buffers_.size());
@@ -272,7 +268,7 @@ void Algorithm::create_descriptor_set_layout() {
       .pBindings = bindings.data(),
   };
 
-  descriptor_set_layout_ = device_ref_.createDescriptorSetLayout(create_info);
+  descriptor_set_layout_ = device_ptr_->createDescriptorSetLayout(create_info);
 }
 
 // ----------------------------------------------------------------------------
@@ -280,7 +276,7 @@ void Algorithm::create_descriptor_set_layout() {
 // ----------------------------------------------------------------------------
 
 void Algorithm::allocate_descriptor_sets() {
-  SPDLOG_TRACE("Algorithm allocate_descriptor_sets");
+  SPD_TRACE_FUNC
 
   if (descriptor_pool_ == nullptr || descriptor_set_layout_ == nullptr) {
     throw std::runtime_error(
@@ -293,7 +289,7 @@ void Algorithm::allocate_descriptor_sets() {
       .pSetLayouts = &descriptor_set_layout_,
   };
 
-  descriptor_set_ = device_ref_.allocateDescriptorSets(allocate_info).front();
+  descriptor_set_ = device_ptr_->allocateDescriptorSets(allocate_info).front();
 }
 
 // ----------------------------------------------------------------------------
@@ -301,7 +297,7 @@ void Algorithm::allocate_descriptor_sets() {
 // ----------------------------------------------------------------------------
 
 void Algorithm::create_pipeline() {
-  SPDLOG_TRACE("Algorithm create_pipeline");
+  SPD_TRACE_FUNC
 
   if (descriptor_set_layout_ == nullptr) {
     throw std::runtime_error("Descriptor set layout is not initialized");
@@ -326,14 +322,14 @@ void Algorithm::create_pipeline() {
           push_constant_ranges.empty() ? nullptr : push_constant_ranges.data()};
 
   pipeline_layout_ =
-      device_ref_.createPipelineLayout(pipeline_layout_create_info);
+      device_ptr_->createPipelineLayout(pipeline_layout_create_info);
 
   pipeline_cache_ =
-      device_ref_.createPipelineCache(vk::PipelineCacheCreateInfo{});
+      device_ptr_->createPipelineCache(vk::PipelineCacheCreateInfo{});
 
   const vk::PipelineShaderStageCreateInfo shader_stage_create_info{
       .stage = vk::ShaderStageFlagBits::eCompute,
-      .module = shader_module_,
+      .module = handle_,
       .pName = "main",
   };
 
@@ -344,7 +340,7 @@ void Algorithm::create_pipeline() {
   };
 
   pipeline_ =
-      device_ref_.createComputePipeline(pipeline_cache_, pipeline_create_info)
+      device_ptr_->createComputePipeline(pipeline_cache_, pipeline_create_info)
           .value;
 
   spdlog::debug("Pipeline [{}] created successfully", shader_path_);
@@ -354,8 +350,8 @@ void Algorithm::create_pipeline() {
 // Update descriptor sets
 // ----------------------------------------------------------------------------
 
-void Algorithm::update_descriptor_sets(const std::vector<vk::Buffer>& buffers) {
-  SPDLOG_TRACE("Algorithm update_descriptor_sets");
+void Algorithm::update_descriptor_sets(const BufferVec& buffers) {
+  SPD_TRACE_FUNC
 
   if (descriptor_set_ == nullptr) {
     throw std::runtime_error("Descriptor set is not initialized");
@@ -368,10 +364,7 @@ void Algorithm::update_descriptor_sets(const std::vector<vk::Buffer>& buffers) {
   buffer_infos.reserve(buffers.size());
 
   for (uint32_t i = 0; i < buffers.size(); ++i) {
-    // buffer_infos.emplace_back(buffers[i].get_descriptor_buffer_info());
-
-    // buffer_infos.emplace_back(mr_ref_.make_descriptor_buffer_info(buffers[i]));
-    buffer_infos.emplace_back(mr_ptr_->make_descriptor_buffer_info(buffers[i]));
+    buffer_infos.emplace_back(buffers[i]->get_descriptor_buffer_info());
 
     compute_write_descriptor_sets.emplace_back(vk::WriteDescriptorSet{
         .dstSet = descriptor_set_,
@@ -383,7 +376,7 @@ void Algorithm::update_descriptor_sets(const std::vector<vk::Buffer>& buffers) {
     });
   }
 
-  device_ref_.updateDescriptorSets(
+  device_ptr_->updateDescriptorSets(
       static_cast<uint32_t>(compute_write_descriptor_sets.size()),
       compute_write_descriptor_sets.data(),
       0,
@@ -395,7 +388,7 @@ void Algorithm::update_descriptor_sets(const std::vector<vk::Buffer>& buffers) {
 // ----------------------------------------------------------------------------
 
 void Algorithm::allocate_push_constants() {
-  SPDLOG_TRACE("Algorithm allocate_push_constants");
+  SPD_TRACE_FUNC
 
   if (push_constants_ptr_) {
     spdlog::warn("Push constants already allocated");
@@ -411,7 +404,7 @@ void Algorithm::allocate_push_constants() {
 // ----------------------------------------------------------------------------
 
 void Algorithm::record_bind_core(const vk::CommandBuffer& cmd_buf) const {
-  SPDLOG_TRACE("Algorithm record_bind_core");
+  SPD_TRACE_FUNC
 
   cmd_buf.bindPipeline(vk::PipelineBindPoint::eCompute, pipeline_);
   cmd_buf.bindDescriptorSets(vk::PipelineBindPoint::eCompute,
@@ -426,7 +419,7 @@ void Algorithm::record_bind_core(const vk::CommandBuffer& cmd_buf) const {
 // ----------------------------------------------------------------------------
 
 void Algorithm::record_bind_push(const vk::CommandBuffer& cmd_buf) const {
-  SPDLOG_TRACE("Algorithm record_bind_push");
+  SPD_TRACE_FUNC
 
   spdlog::debug("Pushing constants of size {}", get_push_constants_size());
 
@@ -463,7 +456,7 @@ void Algorithm::record_bind_push(const vk::CommandBuffer& cmd_buf) const {
 
 void Algorithm::record_dispatch(const vk::CommandBuffer& cmd_buf,
                                 const uint32_t data_count) const {
-  SPDLOG_TRACE("Algorithm record_dispatch");
+  SPD_TRACE_FUNC
 
   const auto workgroup_size_x = get_workgroup_size_x();
   const auto n_blocks = (data_count + workgroup_size_x - 1) / workgroup_size_x;
@@ -480,7 +473,7 @@ void Algorithm::record_dispatch(const vk::CommandBuffer& cmd_buf,
 
 void Algorithm::record_dispatch_blocks(const vk::CommandBuffer& cmd_buf,
                                        const uint32_t n_blocks) const {
-  SPDLOG_TRACE("Algorithm record_dispatch_blocks");
+  SPD_TRACE_FUNC
 
   spdlog::debug("Dispatching {} blocks of size {} threads per block",
                 n_blocks,

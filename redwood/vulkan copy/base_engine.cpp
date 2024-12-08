@@ -1,6 +1,6 @@
 #include "base_engine.hpp"
 
-#include <spdlog/spdlog.h>
+#include "../utils.hpp"
 
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
 #define VMA_IMPLEMENTATION
@@ -21,7 +21,7 @@ namespace vulkan {
 // ----------------------------------------------------------------------------
 
 BaseEngine::BaseEngine(const bool enable_validation_layer) {
-  SPDLOG_TRACE("BaseEngine constructor");
+  SPD_TRACE_FUNC
 
   initialize_dynamic_loader();
 
@@ -41,7 +41,7 @@ BaseEngine::BaseEngine(const bool enable_validation_layer) {
 // ----------------------------------------------------------------------------
 
 void BaseEngine::destroy() const {
-  SPDLOG_TRACE("BaseEngine destructor");
+  SPD_TRACE_FUNC
 
   if (g_vma_allocator) {
     vmaDestroyAllocator(g_vma_allocator);
@@ -53,29 +53,40 @@ void BaseEngine::destroy() const {
 // ----------------------------------------------------------------------------
 
 void BaseEngine::initialize_dynamic_loader() {
-  SPDLOG_TRACE("BaseEngine::initialize_dynamic_loader");
+  SPD_TRACE_FUNC
 
-  // dl_ = vk::detail::DynamicLoader();
+  // dl_ = vk::DynamicLoader();
   dl_ = vk::DynamicLoader();
 
-  // Load the Vulkan library
   vkGetInstanceProcAddr_ =
       dl_.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
+
   if (!vkGetInstanceProcAddr_) {
-    throw std::runtime_error("Failed to load vkGetInstanceProcAddr!");
+    throw std::runtime_error("vkGetInstanceProcAddr not found");
   }
 
   VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr_);
+
+  vkGetDeviceProcAddr_ =
+      dl_.getProcAddress<PFN_vkGetDeviceProcAddr>("vkGetDeviceProcAddr");
+
+  if (!vkGetDeviceProcAddr_) {
+    throw std::runtime_error("vkGetDeviceProcAddr not found");
+  }
 }
 
+// ----------------------------------------------------------------------------
+// Validation layer
+// ----------------------------------------------------------------------------
+
 void BaseEngine::request_validation_layer() {
-  SPDLOG_TRACE("BaseEngine::request_validation_layer");
+  SPD_TRACE_FUNC
 
   constexpr auto validationLayerName = "VK_LAYER_KHRONOS_validation";
 
   const auto availableLayers = vk::enumerateInstanceLayerProperties();
   bool layerFound = std::ranges::any_of(
-      availableLayers, [validationLayerName](const auto &layer) {
+      availableLayers, [validationLayerName](const auto& layer) {
         return std::strcmp(layer.layerName.data(), validationLayerName) == 0;
       });
 
@@ -94,7 +105,7 @@ void BaseEngine::request_validation_layer() {
 // ----------------------------------------------------------------------------
 
 void BaseEngine::create_instance() {
-  SPDLOG_TRACE("BaseEngine::create_instance");
+  SPD_TRACE_FUNC
 
   constexpr vk::ApplicationInfo appInfo{
       .pApplicationName = "Vulkan Compute Example",
@@ -110,13 +121,9 @@ void BaseEngine::create_instance() {
       .ppEnabledLayerNames = enabledLayers_.data(),
   };
 
-  // Create the instance using the default dispatcher
   instance_ = vk::createInstance(instanceCreateInfo);
 
-  // Initialize instance-specific function pointers
   VULKAN_HPP_DEFAULT_DISPATCHER.init(instance_);
-
-  spdlog::info("Instance created successfully");
 }
 
 // ----------------------------------------------------------------------------
@@ -124,7 +131,7 @@ void BaseEngine::create_instance() {
 // ----------------------------------------------------------------------------
 
 void BaseEngine::create_physical_device(vk::PhysicalDeviceType type) {
-  SPDLOG_TRACE("BaseEngine::create_physical_device");
+  SPD_TRACE_FUNC
 
   if (!instance_) {
     throw std::runtime_error("Instance is not valid");
@@ -138,7 +145,7 @@ void BaseEngine::create_physical_device(vk::PhysicalDeviceType type) {
 
   // Try to find an integrated GPU
   const auto integrated_gpu =
-      std::ranges::find_if(physicalDevices, [type](const auto &device) {
+      std::ranges::find_if(physicalDevices, [type](const auto& device) {
         return device.getProperties().deviceType == type;
       });
 
@@ -157,7 +164,7 @@ void BaseEngine::create_physical_device(vk::PhysicalDeviceType type) {
 // ----------------------------------------------------------------------------
 
 [[nodiscard]] vk::PhysicalDeviceVulkan12Features check_vulkan_12_features(
-    const vk::PhysicalDevice &physical_device) {
+    const vk::PhysicalDevice& physical_device) {
   // we want to query and check if uniformAndStorageBuffer8BitAccess is
   // supported before we can create this feature struct
 
@@ -167,8 +174,7 @@ void BaseEngine::create_physical_device(vk::PhysicalDeviceType type) {
   // I need to enable these features for the 8-bit integer shader to work
   vk::PhysicalDeviceVulkan12Features vulkan12_features{
       // Allows the use of 8-bit integer types (int8_t, uint8_t) in storage
-      // buffers. This feature enables shaders to read and write 8-bit
-      // integers
+      // buffers. This feature enables shaders to read and write 8-bit integers
       // in storage buffers directly.
       .storageBuffer8BitAccess = true,
 
@@ -199,7 +205,7 @@ void BaseEngine::create_physical_device(vk::PhysicalDeviceType type) {
 }
 
 void BaseEngine::create_device(vk::QueueFlags queue_flags) {
-  SPDLOG_TRACE("BaseEngine::create_device");
+  SPD_TRACE_FUNC
 
   if (!physical_device_) {
     throw std::runtime_error("Physical device is not valid");
@@ -212,7 +218,7 @@ void BaseEngine::create_device(vk::QueueFlags queue_flags) {
       std::distance(queueFamilyProperties.begin(),
                     std::find_if(queueFamilyProperties.begin(),
                                  queueFamilyProperties.end(),
-                                 [queue_flags](const auto &qfp) {
+                                 [queue_flags](const auto& qfp) {
                                    return qfp.queueFlags & queue_flags;
                                  }));
 
@@ -249,20 +255,43 @@ void BaseEngine::create_device(vk::QueueFlags queue_flags) {
 // ----------------------------------------------------------------------------
 
 void BaseEngine::initialize_vma_allocator() {
-  SPDLOG_TRACE("BaseEngine::initialize_vma_allocator");
+  SPD_TRACE_FUNC
 
   if (!physical_device_ || !device_ || !instance_) {
     throw std::runtime_error(
         "Physical device, device, or instance is not valid");
   }
 
-  // some how disable -Wmissing-field-initializers warning
-
+  // clang-format off
   const VmaVulkanFunctions vulkan_functions{
-      .vkGetInstanceProcAddr =
-          VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr,
+      .vkGetInstanceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr,
       .vkGetDeviceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceProcAddr,
+      .vkGetPhysicalDeviceProperties = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetPhysicalDeviceProperties,
+      .vkGetPhysicalDeviceMemoryProperties = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetPhysicalDeviceMemoryProperties,
+      .vkAllocateMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkAllocateMemory,
+      .vkFreeMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkFreeMemory,
+      .vkMapMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkMapMemory,
+      .vkUnmapMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkUnmapMemory,
+      .vkFlushMappedMemoryRanges = VULKAN_HPP_DEFAULT_DISPATCHER.vkFlushMappedMemoryRanges,
+      .vkInvalidateMappedMemoryRanges = VULKAN_HPP_DEFAULT_DISPATCHER.vkInvalidateMappedMemoryRanges,
+      .vkBindBufferMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkBindBufferMemory,
+      .vkBindImageMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkBindImageMemory,
+      .vkGetBufferMemoryRequirements = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetBufferMemoryRequirements,
+      .vkGetImageMemoryRequirements = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetImageMemoryRequirements,
+      .vkCreateBuffer = VULKAN_HPP_DEFAULT_DISPATCHER.vkCreateBuffer,
+      .vkDestroyBuffer = VULKAN_HPP_DEFAULT_DISPATCHER.vkDestroyBuffer,
+      .vkCreateImage = VULKAN_HPP_DEFAULT_DISPATCHER.vkCreateImage,
+      .vkDestroyImage = VULKAN_HPP_DEFAULT_DISPATCHER.vkDestroyImage,
+      .vkCmdCopyBuffer = VULKAN_HPP_DEFAULT_DISPATCHER.vkCmdCopyBuffer,
+      .vkGetBufferMemoryRequirements2KHR = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetBufferMemoryRequirements2,
+      .vkGetImageMemoryRequirements2KHR = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetImageMemoryRequirements2,
+      .vkBindBufferMemory2KHR = VULKAN_HPP_DEFAULT_DISPATCHER.vkBindBufferMemory2,
+      .vkBindImageMemory2KHR = VULKAN_HPP_DEFAULT_DISPATCHER.vkBindImageMemory2,
+      .vkGetPhysicalDeviceMemoryProperties2KHR = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetPhysicalDeviceMemoryProperties2,
+      .vkGetDeviceBufferMemoryRequirements = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceBufferMemoryRequirements,
+      .vkGetDeviceImageMemoryRequirements = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceImageMemoryRequirements,
   };
+  // clang-format on
 
   const VmaAllocatorCreateInfo vma_allocator_create_info{
       .flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT,
@@ -273,7 +302,6 @@ void BaseEngine::initialize_vma_allocator() {
       .pDeviceMemoryCallbacks = nullptr,
       .pHeapSizeLimit = nullptr,
       .pVulkanFunctions = &vulkan_functions,
-      // .pVulkanFunctions = nullptr,
       .instance = instance_,
       .vulkanApiVersion = VK_API_VERSION_1_3,
       .pTypeExternalMemoryHandleTypes = nullptr};

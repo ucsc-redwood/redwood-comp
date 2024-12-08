@@ -18,14 +18,6 @@ class BaseEngine {
 
   ~BaseEngine() { destroy(); }
 
-  // /**
-  //  * @brief Get the logical device
-  //  * @return Shared pointer to the Vulkan device
-  //  */
-  // [[nodiscard]] std::shared_ptr<vk::Device> get_device_ptr() const {
-  //   return std::make_shared<vk::Device>(device_);
-  // }
-
   [[nodiscard]] vk::Device &get_device() { return device_; }
   [[nodiscard]] vk::Queue &get_compute_queue() { return compute_queue_; }
   [[nodiscard]] uint32_t get_compute_queue_family_index() const {

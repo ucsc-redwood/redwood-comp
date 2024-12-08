@@ -46,13 +46,12 @@ void run_cuda_backend_demo(size_t n) {
 
 #ifdef REDWOOD_VULKAN_BACKEND
 
-#include "redwood/vulkan/vk_allocator.hpp"
+#include "redwood/vulkan/engine.hpp"
 #include "vulkan/vk_dispatchers.hpp"
 
 void run_vulkan_backend_demo(const size_t n) {
   vulkan::Engine engine;
-  vulkan::VulkanMemoryResource vk_mr(engine);
-  AppData app_data(&vk_mr, n);
+  AppData app_data(engine.get_mr(), n);
 
   vulkan::run_stage1(engine, app_data);
   print_output(app_data);
@@ -77,10 +76,6 @@ int main(int argc, char** argv) {
   auto big_cores = helpers::get_cores_by_type(config["cpu_info"], "big");
 
   assert(!small_cores.empty());
-
-  // spdlog::info("Small cores: [{}]", fmt::join(small_cores, ", "));
-  // spdlog::info("Medium cores: [{}]", fmt::join(medium_cores, ", "));
-  // spdlog::info("Big cores: [{}]", fmt::join(big_cores, ", "));
 
   spdlog::set_level(spdlog::level::trace);
 
