@@ -27,5 +27,7 @@ add_requires("cli11")
 
 includes("hello_world")
 includes("cifar/dense")
+includes("tree")
+
 -- includes("tmp")
 
