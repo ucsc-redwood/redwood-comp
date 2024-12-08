@@ -6,6 +6,7 @@
 #include "01_morton.cuh"
 #include "02_sort.cuh"
 #include "03_unique.cuh"
+#include "04_radix_tree.cuh"
 #include "agents/prefix_sum_agent.cuh"
 #include "agents/unique_agent.cuh"
 #include "common.cuh"
@@ -463,9 +464,11 @@ __global__ void k_DigitBinningPass(unsigned int *sort,
   }
 }
 
-// // ----------------------------------------------------------------------------
+// //
+// ----------------------------------------------------------------------------
 // // Unique
-// // ----------------------------------------------------------------------------
+// //
+// ----------------------------------------------------------------------------
 
 // __global__ void k_FindDups(const unsigned int *u_keys,
 //                            int *u_flag_heads,
@@ -660,10 +663,18 @@ void run_stage3(AppData &app_data, ImStorage &im_storage, cudaStream_t stream) {
 // ----------------------------------------------------------------------------
 
 void run_stage4(AppData &app_data, cudaStream_t stream) {
+  constexpr auto gridDim = 16;
+  constexpr auto blockDim = 512;
+  constexpr auto sharedMem = 0;
 
-
-
-    
+  kernels::k_BuildRadixTree<<<gridDim, blockDim, sharedMem, stream>>>(
+      app_data.get_n_unique(),
+      app_data.get_unique_morton_keys(),
+      app_data.brt.u_prefix_n.data(),
+      app_data.brt.u_has_leaf_left.data(),
+      app_data.brt.u_has_leaf_right.data(),
+      app_data.brt.u_left_child.data(),
+      app_data.brt.u_parents.data());
 }
 
 }  // namespace cuda
