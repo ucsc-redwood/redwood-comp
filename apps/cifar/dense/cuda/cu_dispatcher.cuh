@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../app_data.hpp"
+#include "../../app_data.hpp"
 
 namespace cuda {
 

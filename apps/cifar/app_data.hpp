@@ -130,7 +130,7 @@ constexpr int kLinearOutSize = kLinearOutFeatures; // 10
 // Application Data
 // ----------------------------------------------------------------------------
 
-struct AppData final : public BaseAppData {
+struct AppData : public BaseAppData {
   explicit AppData(std::pmr::memory_resource* mr);
 
   // Input

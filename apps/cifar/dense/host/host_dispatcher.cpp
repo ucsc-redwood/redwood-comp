@@ -2,7 +2,6 @@
 
 #include <spdlog/spdlog.h>
 
-#include "apps/cifar/dense/app_data.hpp"
 #include "host_kernels.hpp"
 
 namespace cpu {

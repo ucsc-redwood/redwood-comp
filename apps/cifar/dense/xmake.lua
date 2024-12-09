@@ -1,9 +1,18 @@
+local cpp_source = {
+  "host/*.cpp",
+  "../app_data.cpp"
+}
+
+local cpp_header = {
+  "../*.hpp",
+  "host/*.hpp"
+}
 
 target("app-cifar-dense")
     set_kind("binary")
     add_includedirs("$(projectdir)")
-    add_headerfiles("*.hpp", "host/*.hpp")
-    add_files("main.cpp", "host/*.cpp", "app_data.cpp")
+    add_headerfiles(cpp_header)
+    add_files("main.cpp", cpp_source)
     add_packages("spdlog", "cli11", "yaml-cpp")
     add_deps("cpu-backend")
     if is_plat("android") then
@@ -31,8 +40,8 @@ target("app-cifar-dense")
 target("bm-cifar-dense-cpu")
     set_kind("binary")
     add_includedirs("$(projectdir)")
-    add_headerfiles("*.hpp", "host/*.hpp")
-    add_files("bm_pinned.cpp", "host/*.cpp", "app_data.cpp")
+    add_headerfiles(cpp_header)
+    add_files("bm_pinned.cpp", cpp_source)
     add_packages("spdlog", "cli11", "yaml-cpp")
     add_deps("cpu-backend")
     if is_plat("android") then
@@ -46,8 +55,8 @@ if has_config("vulkan-backend") then
 target("bm-cifar-dense-vk")
     set_kind("binary")
     add_includedirs("$(projectdir)")
-    add_headerfiles("*.hpp")
-    add_files("bm_vulkan.cpp", "app_data.cpp")
+    add_headerfiles(cpp_header)
+    add_files("bm_vulkan.cpp", cpp_source)
     add_packages("spdlog", "cli11", "yaml-cpp")
 
     if is_plat("android") then
@@ -70,8 +79,8 @@ if has_config("cuda-backend") then
 target("bm-cifar-dense-cuda")
     set_kind("binary")
     add_includedirs("$(projectdir)")
-    add_headerfiles("*.hpp")
-    add_files("bm_cuda.cpp", "app_data.cpp")
+    add_headerfiles(cpp_header)
+    add_files("bm_cuda.cpp", cpp_source)
     add_packages("spdlog", "cli11", "yaml-cpp")
 
     if is_plat("android") then

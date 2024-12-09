@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include "app_data.hpp"
+#include "../app_data.hpp"
 #include "cuda/cu_dispatcher.cuh"
 #include "redwood/cuda/cu_mem_resource.cuh"
 #include "redwood/cuda/helpers.cuh"
