@@ -81,27 +81,34 @@ target("bm-tree-cpu")
 
 -- end
 
--- if has_config("cuda-backend") then
+if has_config("cuda-backend") then
 
--- target("bm-cifar-dense-cuda")
---     set_kind("binary")
---     add_includedirs("$(projectdir)")
---     add_headerfiles("*.hpp")
---     add_files("bm_cuda.cpp", "app_data.cpp")
---     add_packages("spdlog", "cli11", "yaml-cpp")
+target("bm-tree-cuda")
+    set_kind("binary")
+    add_includedirs("$(projectdir)")
+    add_headerfiles("*.hpp")
+    add_files("bm_cuda.cpp")
+    add_packages("spdlog", "cli11", "yaml-cpp")
 
---     if is_plat("android") then
---       on_run(run_on_android)
---     end
+    add_packages("glm")
 
---     add_packages("benchmark")
+    if is_plat("android") then
+      on_run(run_on_android)
+    end
+
+    add_packages("benchmark")
     
---     add_defines("REDWOOD_CUDA_BACKEND")
---     add_deps("cu-backend")
---     add_headerfiles("cuda/*.cuh")
---     add_files("cuda/*.cu")
---     add_cugencodes("native")
+    add_defines("REDWOOD_CUDA_BACKEND")
+    add_deps("cu-backend")
+    add_headerfiles("cuda/*.cuh")
+    add_files("cuda/*.cu")
+    add_cugencodes("native")
 
--- target_end()
+    -- -- For quickly setting up benchmarks
+    -- add_deps("cpu-backend")
+    -- add_headerfiles("host/*.hpp")
+    -- add_files("host/*.cpp")
 
--- end
+target_end()
+
+end

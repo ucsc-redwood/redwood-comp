@@ -106,5 +106,6 @@ int main(int argc, char** argv) {
   }
 
   spdlog::info("Done.");
-  return 0;
+
+  return EXIT_SUCCESS;
 }
