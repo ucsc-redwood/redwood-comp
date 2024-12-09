@@ -2,10 +2,11 @@
 
 namespace vulkan {
 
-Dispatcher::Dispatcher(Engine &engine, AppData &app_data)
-    : engine_ref(engine),
-      app_data_ref(app_data),
-      tmp_storage(engine.get_mr(), app_data.get_n_input()) {
+Dispatcher::Dispatcher(Engine &engine,
+                       AppData &app_data,
+                       TmpStorage &tmp_storage)
+    : engine_ref(engine), app_data_ref(app_data), tmp_storage(tmp_storage) {
+  //   tmp_storage(engine.get_mr(), app_data.get_n_input()) {
   // --------------------------------------------------------------------------
   // Morton
   // --------------------------------------------------------------------------

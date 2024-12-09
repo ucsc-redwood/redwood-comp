@@ -98,7 +98,8 @@ void run_vulkan_demo(const size_t input_size) {
   vulkan::Engine engine;
   AppData app_data(engine.get_mr(), input_size);
 
-  vulkan::Dispatcher dispatcher(engine, app_data);
+  vulkan::TmpStorage tmp_storage(engine.get_mr(), input_size);
+  vulkan::Dispatcher dispatcher(engine, app_data, tmp_storage);
 
   auto seq = engine.sequence();
 

@@ -7,7 +7,9 @@
 namespace vulkan {
 
 struct Dispatcher {
-  explicit Dispatcher(Engine &engine, AppData &app_data);
+  explicit Dispatcher(Engine &engine,
+                      AppData &app_data,
+                      TmpStorage &tmp_storage);
 
   // --------------------------------------------------------------------------
   // Stage 1
@@ -86,7 +88,7 @@ struct Dispatcher {
 
   Engine &engine_ref;
   AppData &app_data_ref;
-  TmpStorage tmp_storage;
+  TmpStorage &tmp_storage;
 
   std::unordered_map<std::string, std::shared_ptr<Algorithm>> cached_algorithms;
 };
