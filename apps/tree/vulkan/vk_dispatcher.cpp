@@ -55,7 +55,7 @@ Dispatcher::Dispatcher(Engine &engine, AppData &app_data)
       engine
           .algorithm("tree_find_dups.comp",
                      {
-                         engine.get_buffer(app_data.u_morton_keys_alt.data()),
+                         engine.get_buffer(app_data.get_sorted_morton_keys()),
                          engine.get_buffer(tmp_storage.u_contributes.data()),
                      })
           ->set_push_constants<FindDupsPushConstants>({
@@ -73,9 +73,9 @@ Dispatcher::Dispatcher(Engine &engine, AppData &app_data)
       engine
           .algorithm("tree_move_dups.comp",
                      {
-                         engine.get_buffer(tmp_storage.u_contributes.data()),
-                         engine.get_buffer(app_data.u_morton_keys_alt.data()),
-                         engine.get_buffer(app_data.u_morton_keys.data()),
+                         engine.get_buffer(tmp_storage.u_out_idx.data()),
+                         engine.get_buffer(app_data.get_sorted_morton_keys()),
+                         engine.get_buffer(app_data.get_unique_morton_keys()),
                      })
           ->set_push_constants<MoveDupsPushConstants>({
               .n = static_cast<uint32_t>(app_data.get_n_input()),
@@ -93,7 +93,7 @@ Dispatcher::Dispatcher(Engine &engine, AppData &app_data)
           .algorithm(
               "tree_build_radix_tree.comp",
               {
-                  engine.get_buffer(app_data.u_morton_keys.data()),
+                  engine.get_buffer(app_data.get_unique_morton_keys()),
                   engine.get_buffer(app_data.brt.u_prefix_n.data()),
                   engine.get_buffer(app_data.brt.u_has_leaf_left.data()),
                   engine.get_buffer(app_data.brt.u_has_leaf_right.data()),
@@ -155,7 +155,7 @@ Dispatcher::Dispatcher(Engine &engine, AppData &app_data)
                   engine.get_buffer(app_data.oct.u_child_leaf_mask.data()),
                   engine.get_buffer(app_data.u_edge_offset.data()),
                   engine.get_buffer(app_data.u_edge_count.data()),
-                  engine.get_buffer(app_data.u_morton_keys.data()),
+                  engine.get_buffer(app_data.get_unique_morton_keys()),
                   engine.get_buffer(app_data.brt.u_prefix_n.data()),
                   engine.get_buffer(app_data.brt.u_parents.data()),
                   engine.get_buffer(app_data.brt.u_left_child.data()),
@@ -238,7 +238,80 @@ void Dispatcher::run_stage2(Sequence *seq) {
                      app_data_ref.get_sorted_morton_keys() + n);
   spdlog::info("Is sorted: {}", is_sorted);
 
-  exit(0);
+  //   exit(0);
+}
+
+// ----------------------------------------------------------------------------
+// Stage 3: Unique
+// ----------------------------------------------------------------------------
+
+void Dispatcher::run_stage3(Sequence *seq) {
+  const uint32_t n = app_data_ref.get_n_input();
+
+  auto find_dups = cached_algorithms.at("find_dups").get();
+
+  auto prefix_sum = cached_algorithms.at("prefix_sum").get();
+
+  auto move_dups = cached_algorithms.at("move_dups").get();
+
+  find_dups->update_push_constants(FindDupsPushConstants{
+      .n = static_cast<int32_t>(n),
+  });
+
+  prefix_sum->update_push_constants(PrefixSumPushConstants{
+      .inputSize = n,
+  });
+  prefix_sum->update_descriptor_sets({
+      engine_ref.get_buffer(tmp_storage.u_contributes.data()),
+      engine_ref.get_buffer(tmp_storage.u_out_idx.data()),
+  });
+
+  move_dups->update_push_constants(MoveDupsPushConstants{
+      .n = n,
+  });
+
+  seq->record_commands(find_dups, n);
+  seq->launch_kernel_async();
+  seq->sync();
+
+  // print 10 u_contributes
+  for (auto i = 0; i < 10; ++i) {
+    spdlog::trace("u_contributes[{}] = {}", i, tmp_storage.u_contributes[i]);
+  }
+
+  seq->record_commands_with_blocks(prefix_sum, 1);
+  seq->launch_kernel_async();
+  seq->sync();
+
+  // print 10 u_out_idx
+  for (auto i = 0; i < 10; ++i) {
+    spdlog::trace("u_out_idx[{}] = {}", i, tmp_storage.u_out_idx[i]);
+  }
+
+  seq->record_commands(move_dups, n);
+  seq->launch_kernel_async();
+  seq->sync();
+
+  const auto n_unique = tmp_storage.u_out_idx[n - 1] + 1;
+  app_data_ref.set_n_unique(n_unique);
+  app_data_ref.set_n_brt_nodes(n_unique - 1);
+
+  // print 10 u_out_idx
+  for (auto i = 0; i < 10; ++i) {
+    spdlog::trace("u_out_idx[{}] = {}", i, tmp_storage.u_out_idx[i]);
+  }
+
+  spdlog::info("GPU n_unique: {}", n_unique);
+}
+
+// ----------------------------------------------------------------------------
+// Stage 4: Build Radix Tree
+// ----------------------------------------------------------------------------
+
+void Dispatcher::run_stage4(Sequence *seq) {
+  const uint32_t n = app_data_ref.get_n_unique();
+
+  
 }
 
 }  // namespace vulkan
