@@ -102,8 +102,14 @@ void run_vulkan_demo(const size_t input_size) {
 
   auto seq = engine.sequence();
 
-  // dispatcher.run_stage1(seq.get());
-  // dispatcher.run_stage2(seq.get());
+  dispatcher.run_stage1(seq.get());
+  dispatcher.run_stage2(seq.get());
+
+  // peek 10 morton keys
+  for (auto i = 0; i < 10; ++i) {
+    spdlog::info("morton_keys[{}] = {}", i, app_data.u_morton_keys[i]);
+  }
+
   // dispatcher.run_stage3(seq.get());
   // dispatcher.run_stage4(seq.get());
   // dispatcher.run_stage5(seq.get());

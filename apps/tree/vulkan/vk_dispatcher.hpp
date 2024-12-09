@@ -88,7 +88,7 @@ struct Dispatcher {
   AppData &app_data_ref;
   TmpStorage tmp_storage;
 
-  std::unordered_map<std::string, std::shared_ptr<Algorithm>> algorithms;
+  std::unordered_map<std::string, std::shared_ptr<Algorithm>> cached_algorithms;
 };
 
 }  // namespace vulkan
