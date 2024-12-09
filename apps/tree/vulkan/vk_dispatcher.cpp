@@ -309,9 +309,87 @@ void Dispatcher::run_stage3(Sequence *seq) {
 // ----------------------------------------------------------------------------
 
 void Dispatcher::run_stage4(Sequence *seq) {
-  const uint32_t n = app_data_ref.get_n_unique();
+  const int32_t n = app_data_ref.get_n_unique();
 
-  
+  auto build_radix_tree = cached_algorithms.at("build_radix_tree").get();
+
+  build_radix_tree->update_push_constants(BuildTreePushConstants{
+      .n = n,
+  });
+
+  seq->record_commands(build_radix_tree, n);
+  seq->launch_kernel_async();
+  seq->sync();
+}
+
+// ----------------------------------------------------------------------------
+// Stage 5: Edge Count
+// ----------------------------------------------------------------------------
+
+void Dispatcher::run_stage5(Sequence *seq) {
+  auto edge_count = cached_algorithms.at("edge_count").get();
+
+  const int32_t n = app_data_ref.get_n_brt_nodes();
+
+  edge_count->update_push_constants(EdgeCountPushConstants{
+      .n_brt_nodes = n,
+  });
+
+  seq->record_commands(edge_count, n);
+  seq->launch_kernel_async();
+  seq->sync();
+}
+
+// ----------------------------------------------------------------------------
+// Stage 6: Prefix Sum
+// ----------------------------------------------------------------------------
+
+void Dispatcher::run_stage6(Sequence *seq) {
+  auto prefix_sum = cached_algorithms.at("prefix_sum").get();
+
+  const uint32_t n = app_data_ref.get_n_brt_nodes();
+
+  prefix_sum->update_descriptor_sets({
+      engine_ref.get_buffer(app_data_ref.u_edge_count.data()),
+      engine_ref.get_buffer(app_data_ref.u_edge_offset.data()),
+  });
+
+  prefix_sum->update_push_constants(PrefixSumPushConstants{
+      .inputSize = n,
+  });
+
+  seq->record_commands_with_blocks(prefix_sum, 1);
+  seq->launch_kernel_async();
+  seq->sync();
+
+  //   const auto n_octree_nodes =
+  //   data.u_edge_offset->at(data.get_n_brt_nodes());
+
+  //   spdlog::info("n_octree_nodes: {}", n_octree_nodes);
+  //   data.set_n_octree_nodes(n_octree_nodes);
+
+  const auto n_octree_nodes = app_data_ref.u_edge_offset[n - 1] + 1;
+  app_data_ref.set_n_octree_nodes(n_octree_nodes);
+}
+
+// ----------------------------------------------------------------------------
+// Stage 7: Build Octree
+// ----------------------------------------------------------------------------
+
+void Dispatcher::run_stage7(Sequence *seq) {
+  auto build_octree = cached_algorithms.at("build_octree").get();
+
+  const int32_t n = app_data_ref.get_n_brt_nodes();
+
+  build_octree->update_push_constants(OctreePushConstants{
+      .min_coord = app_data_ref.min_coord,
+      .range = app_data_ref.range,
+      .n_brt_nodes = n,
+  });
+
+  seq->record_commands(build_octree, n);
+  seq->launch_kernel_async();
+  seq->sync();
 }
 
 }  // namespace vulkan

@@ -111,14 +111,10 @@ void run_vulkan_demo(const size_t input_size) {
   }
 
   dispatcher.run_stage3(seq.get());
-
-  // check if unique_morton uptp
-
-  // dispatcher.run_stage4(seq.get());
-
-  // dispatcher.run_stage5(seq.get());
-  // dispatcher.run_stage6(seq.get());
-  // dispatcher.run_stage7(seq.get());
+  dispatcher.run_stage4(seq.get());
+  dispatcher.run_stage5(seq.get());
+  dispatcher.run_stage6(seq.get());
+  dispatcher.run_stage7(seq.get());
 
   // print_stats(app_data);
 
