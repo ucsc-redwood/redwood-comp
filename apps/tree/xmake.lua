@@ -34,14 +34,14 @@ target("app-tree")
       add_cugencodes("native")
     end
 
-    -- -- Vulkan related (optional)
-    -- if has_config("vulkan-backend") then
-    --   add_defines("REDWOOD_VULKAN_BACKEND")
-    --   add_headerfiles("vulkan/*.hpp")
-    --   add_files("vulkan/*.cpp")      
-    --   add_deps("vk-backend")
-    --   add_packages("vulkan-hpp", "vulkan-memory-allocator")
-    -- end
+    -- Vulkan related (optional)
+    if has_config("vulkan-backend") then
+      add_defines("REDWOOD_VULKAN_BACKEND")
+      add_headerfiles("vulkan/*.hpp")
+      add_files("vulkan/*.cpp")      
+      add_deps("vk-backend")
+      add_packages("vulkan-hpp", "vulkan-memory-allocator")
+    end
 
 target("bm-tree-cpu")
     set_kind("binary")

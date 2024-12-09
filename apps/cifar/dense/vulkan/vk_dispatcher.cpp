@@ -1,7 +1,5 @@
 #include "vk_dispatcher.hpp"
 
-#include "apps/cifar/dense/app_data.hpp"
-
 namespace vulkan {
 
 Dispatcher::Dispatcher(Engine &engine, AppData &app_data)

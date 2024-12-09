@@ -42,6 +42,24 @@ class Algorithm final : public std::enable_shared_from_this<Algorithm> {
     return shared_from_this();
   }
 
+  // Allocate enough space for push constants, but does not have any data
+  // You need to 'update_push_constants' later
+  template <typename T>
+  std::shared_ptr<Algorithm> place_holder_push_constants() {
+    if (!has_push_constants()) {
+      throw std::runtime_error(
+          "Push constants not reported by shader, thus don't set push "
+          "constants");
+    }
+
+    if (push_constants_ptr_ == nullptr) {
+      allocate_push_constants();
+    }
+
+    // update_push_constants(data);
+    return shared_from_this();
+  }
+
   template <typename T>
   void update_push_constants(const T data) {
     if (push_constants_ptr_ == nullptr) {

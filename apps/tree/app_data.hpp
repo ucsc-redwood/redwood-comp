@@ -80,7 +80,8 @@ struct AppData final : public BaseAppData {
         : u_children(n_nodes * 8, mr),
           u_corner(n_nodes, mr),
           u_cell_size(n_nodes, mr),
-          u_child_node_mask(n_nodes, mr) {}
+          u_child_node_mask(n_nodes, mr),
+          u_child_leaf_mask(n_nodes, mr) {}
 
     // int (*u_children)[8]; note, this is 8x more
     UsmVector<int32_t> u_children;

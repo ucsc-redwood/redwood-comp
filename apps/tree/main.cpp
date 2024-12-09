@@ -7,6 +7,7 @@
 #include "redwood/backends.hpp"
 
 // forward declarations
+void run_vulkan_demo(const size_t input_size);
 void run_cuda_demo(const size_t input_size);
 
 void print_stats(const AppData& app_data) {
@@ -89,6 +90,33 @@ void run_cuda_demo(const size_t input_size) {
 
 #endif
 
+#ifdef REDWOOD_VULKAN_BACKEND
+
+#include "vulkan/vk_dispatcher.hpp"
+
+void run_vulkan_demo(const size_t input_size) {
+  vulkan::Engine engine;
+  AppData app_data(engine.get_mr(), input_size);
+
+  vulkan::Dispatcher dispatcher(engine, app_data);
+
+  auto seq = engine.sequence();
+
+  // dispatcher.run_stage1(seq.get());
+  // dispatcher.run_stage2(seq.get());
+  // dispatcher.run_stage3(seq.get());
+  // dispatcher.run_stage4(seq.get());
+  // dispatcher.run_stage5(seq.get());
+  // dispatcher.run_stage6(seq.get());
+  // dispatcher.run_stage7(seq.get());
+
+  // print_stats(app_data);
+
+  spdlog::info("Vulkan Done.");
+}
+
+#endif
+
 int main(int argc, char** argv) {
   auto config = helpers::init_demo(argc, argv);
   auto small_cores = helpers::get_cores_by_type(config["cpu_info"], "small");
@@ -103,6 +131,10 @@ int main(int argc, char** argv) {
 
   if constexpr (is_backend_enabled(BackendType::kCUDA)) {
     run_cuda_demo(640 * 480);
+  }
+
+  if constexpr (is_backend_enabled(BackendType::kVulkan)) {
+    run_vulkan_demo(640 * 480);
   }
 
   spdlog::info("Done.");
