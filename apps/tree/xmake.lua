@@ -57,29 +57,30 @@ target("bm-tree-cpu")
 
     add_packages("benchmark")
 
--- if has_config("vulkan-backend") then
+if has_config("vulkan-backend") then
 
--- target("bm-cifar-dense-vk")
---     set_kind("binary")
---     add_includedirs("$(projectdir)")
---     add_headerfiles("*.hpp")
---     add_files("bm_vulkan.cpp", "app_data.cpp")
---     add_packages("spdlog", "cli11", "yaml-cpp")
+target("bm-tree-vk")
+    set_kind("binary")
+    add_includedirs("$(projectdir)")
+    add_headerfiles("*.hpp")
+    add_files("bm_vulkan.cpp")
+    add_packages("spdlog", "cli11", "yaml-cpp")
+    add_packages("glm")
 
---     if is_plat("android") then
---       on_run(run_on_android)
---     end
+    if is_plat("android") then
+      on_run(run_on_android)
+    end
 
---     add_packages("benchmark")
+    add_packages("benchmark")
 
---     add_defines("REDWOOD_VULKAN_BACKEND")
---     add_headerfiles("vulkan/*.hpp")
---     add_files("vulkan/*.cpp")      
---     add_deps("vk-backend")
---     add_packages("vulkan-hpp", "vulkan-memory-allocator")
--- target_end()
+    add_defines("REDWOOD_VULKAN_BACKEND")
+    add_headerfiles("vulkan/*.hpp")
+    add_files("vulkan/*.cpp")      
+    add_deps("vk-backend")
+    add_packages("vulkan-hpp", "vulkan-memory-allocator")
+target_end()
 
--- end
+end
 
 if has_config("cuda-backend") then
 
@@ -103,11 +104,6 @@ target("bm-tree-cuda")
     add_headerfiles("cuda/*.cuh")
     add_files("cuda/*.cu")
     add_cugencodes("native")
-
-    -- -- For quickly setting up benchmarks
-    -- add_deps("cpu-backend")
-    -- add_headerfiles("host/*.hpp")
-    -- add_files("host/*.cpp")
 
 target_end()
 
