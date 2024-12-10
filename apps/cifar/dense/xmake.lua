@@ -41,7 +41,7 @@ target("bm-cifar-dense-cpu")
     set_kind("binary")
     add_includedirs("$(projectdir)")
     add_headerfiles(cpp_header)
-    add_files("bm_pinned.cpp", cpp_source)
+    add_files("bm_cpu.cpp", cpp_source)
     add_packages("spdlog", "cli11", "yaml-cpp")
     add_deps("cpu-backend")
     if is_plat("android") then

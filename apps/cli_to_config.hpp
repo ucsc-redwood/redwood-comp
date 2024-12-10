@@ -23,11 +23,16 @@ namespace helpers {
   }
 }
 
-[[nodiscard]] inline YAML::Node init_demo(int argc, char** argv) {
+[[nodiscard]] inline YAML::Node init_demo(int argc,
+                                          char** argv,
+                                          const std::string_view app_name) {
   std::string device_id;
+  std::string log_level;
 
-  CLI::App app{};
+  CLI::App app{std::string(app_name)};
   app.add_option("-d,--device", device_id, "Device ID")->required();
+  app.add_option("-l,--log-level", log_level, "Log level")->default_val("info");
+
   app.allow_extras();
 
   try {
@@ -38,6 +43,8 @@ namespace helpers {
 
     exit(e.get_exit_code());
   }
+
+  spdlog::set_level(spdlog::level::from_str(log_level));
 
   return load_config(device_id);
 }

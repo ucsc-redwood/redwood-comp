@@ -1,5 +1,7 @@
-#include "../../cli_to_config.hpp"
-#include "../../read_config.hpp"
+// #include "../../cli_to_config.hpp"
+// #include "../../read_config.hpp"'
+
+#include "../../app.hpp"
 #include "../app_data.hpp"
 #include "host/host_dispatcher.hpp"
 #include "redwood/backends.hpp"
@@ -34,11 +36,12 @@ void print_prediction(const int max_index) {
   std::cout << std::endl;
 }
 
-void run_cpu_demo(const std::vector<int>& cores, const size_t n_threads) {
+void run_cpu_demo() {
   auto mr = std::pmr::new_delete_resource();
   AppData app_data(mr);
 
-  core::thread_pool pool(cores);
+  core::thread_pool pool(g_small_cores);
+  const auto n_threads = g_small_cores.size();
 
   cpu::run_stage1(app_data, pool, n_threads).wait();
   cpu::run_stage2(app_data, pool, n_threads).wait();
@@ -113,24 +116,15 @@ void run_cuda_demo() {
 #endif
 
 int main(int argc, char** argv) {
-  auto config = helpers::init_demo(argc, argv);
-  auto small_cores = helpers::get_cores_by_type(config["cpu_info"], "small");
-  auto medium_cores = helpers::get_cores_by_type(config["cpu_info"], "medium");
-  auto big_cores = helpers::get_cores_by_type(config["cpu_info"], "big");
+  INIT_APP("cifar_dense");
 
-  assert(!small_cores.empty());
-
-  spdlog::set_level(spdlog::level::trace);
-
-  run_cpu_demo(small_cores, small_cores.size());
+  run_cpu_demo();
 
   if constexpr (is_backend_enabled(BackendType::kVulkan)) {
-    spdlog::info("Vulkan backend is enabled");
     run_vulkan_demo();
   }
 
   if constexpr (is_backend_enabled(BackendType::kCUDA)) {
-    spdlog::info("CUDA backend is enabled");
     run_cuda_demo();
   }
 

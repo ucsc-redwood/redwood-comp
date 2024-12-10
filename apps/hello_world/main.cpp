@@ -3,8 +3,7 @@
 #include <CLI/CLI.hpp>
 #include <memory_resource>
 
-#include "../cli_to_config.hpp"
-#include "../read_config.hpp"
+#include "../app.hpp"
 #include "app_data.hpp"
 #include "host/host_dispatchers.hpp"
 #include "redwood/backends.hpp"
@@ -60,38 +59,27 @@ void run_vulkan_backend_demo(const size_t n) {
 
 #endif
 
-void run_cpu_backend_demo(const size_t n, const std::vector<int>& small_cores) {
+void run_cpu_backend_demo(const size_t n) {
   auto host_mr = std::pmr::new_delete_resource();
   AppData app_data(host_mr, n);
 
-  core::thread_pool pool(small_cores);
-  cpu::v2::run_stage1(app_data, pool, small_cores.size()).wait();
+  core::thread_pool pool(g_small_cores);
+  cpu::v2::run_stage1(app_data, pool, g_small_cores.size()).wait();
 
   print_output(app_data);
 }
 
 int main(int argc, char** argv) {
-  auto config = helpers::init_demo(argc, argv);
-  auto small_cores = helpers::get_cores_by_type(config["cpu_info"], "small");
-  auto medium_cores = helpers::get_cores_by_type(config["cpu_info"], "medium");
-  auto big_cores = helpers::get_cores_by_type(config["cpu_info"], "big");
-
-  assert(!small_cores.empty());
-
-  spdlog::set_level(spdlog::level::trace);
+  INIT_APP("hello_world")
 
   constexpr auto n = 1024;
 
-  if constexpr (is_backend_enabled(BackendType::kCPU)) {
-    spdlog::info("CPU backend is enabled");
-    run_cpu_backend_demo(n, small_cores);
-  }
+  run_cpu_backend_demo(n);
+
   if constexpr (is_backend_enabled(BackendType::kCUDA)) {
-    spdlog::info("CUDA backend is enabled");
     run_cuda_backend_demo(n);
   }
   if constexpr (is_backend_enabled(BackendType::kVulkan)) {
-    spdlog::info("Vulkan backend is enabled");
     run_vulkan_backend_demo(n);
   }
 

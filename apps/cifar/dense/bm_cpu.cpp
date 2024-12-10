@@ -1,18 +1,8 @@
 #include <benchmark/benchmark.h>
 
-#include "../../cli_to_config.hpp"
-#include "../../read_config.hpp"
+#include "../../app.hpp"
 #include "../app_data.hpp"
 #include "host/host_dispatcher.hpp"
-
-// ----------------------------------------------------------------------------
-// Global Vars
-// ----------------------------------------------------------------------------
-
-YAML::Node g_config;
-std::vector<int> g_small_cores;
-std::vector<int> g_medium_cores;
-std::vector<int> g_big_cores;
 
 // ----------------------------------------------------------------------------
 // Fixtures
@@ -140,14 +130,7 @@ void RegisterBenchmarkWithRange(const int n_small_cores,
 // ----------------------------------------------------------------------------
 
 int main(int argc, char** argv) {
-  g_config = helpers::init_demo(argc, argv);
-  g_small_cores = helpers::get_cores_by_type(g_config["cpu_info"], "small");
-  g_medium_cores = helpers::get_cores_by_type(g_config["cpu_info"], "medium");
-  g_big_cores = helpers::get_cores_by_type(g_config["cpu_info"], "big");
-
-  assert(!g_small_cores.empty());
-
-  spdlog::set_level(spdlog::level::off);
+  INIT_APP("bm_cifar_dense");
 
   RegisterBenchmarkWithRange(
       g_small_cores.size(), g_medium_cores.size(), g_big_cores.size());
