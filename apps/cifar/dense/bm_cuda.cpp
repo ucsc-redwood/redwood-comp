@@ -7,7 +7,7 @@
 #include "../app_data.hpp"
 #include "cuda/cu_dispatcher.cuh"
 #include "redwood/cuda/cu_mem_resource.cuh"
-#include "redwood/cuda/helpers.cuh"
+// #include "redwood/cuda/helpers.cuh"
 
 // ----------------------------------------------------------------------------
 // Fixtures
@@ -16,23 +16,27 @@
 class iGPU_CUDA : public benchmark::Fixture {
  protected:
   void SetUp(benchmark::State&) override {
-    CUDA_CHECK(cudaStreamCreate(&stream));
+    // CUDA_CHECK(cudaStreamCreate(&stream));
 
     // Keep the memory resource alive for the lifetime of the fixture
     mr = std::make_unique<cuda::CudaMemoryResource>();
     app_data = std::make_unique<AppData>(mr.get());
+    dispatcher = std::make_unique<cuda::Dispatcher>(*app_data, 1);
   }
 
   void TearDown(benchmark::State&) override {
-    CUDA_CHECK(cudaStreamSynchronize(stream));
+    // CUDA_CHECK(cudaStreamSynchronize(stream));
 
     app_data.reset();
-    CUDA_CHECK(cudaStreamDestroy(stream));
+    dispatcher.reset();
+
+    // CUDA_CHECK(cudaStreamDestroy(stream));
   }
 
   std::unique_ptr<cuda::CudaMemoryResource> mr;
   std::unique_ptr<AppData> app_data;
-  cudaStream_t stream;
+  std::unique_ptr<cuda::Dispatcher> dispatcher;
+  // cudaStream_t stream;
 };
 
 // ----------------------------------------------------------------------------
@@ -43,7 +47,7 @@ class iGPU_CUDA : public benchmark::Fixture {
   BENCHMARK_DEFINE_F(iGPU_CUDA, NAME) \
   (benchmark::State & state) {        \
     for (auto _ : state) {            \
-      cuda::NAME(*app_data, stream);  \
+      dispatcher->NAME(0, true);      \
     }                                 \
   }
 

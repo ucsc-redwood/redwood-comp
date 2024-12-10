@@ -305,4 +305,57 @@ void run_stage9(AppData &app_data, const cudaStream_t stream, bool sync) {
   }
 }
 
+// -----------------------------------------------------------------------------
+// Dispatcher Class
+// -----------------------------------------------------------------------------
+
+Dispatcher::Dispatcher(AppData &app_data, size_t n_concurrent)
+    : app_data(app_data), streams(n_concurrent) {
+  for (size_t i = 0; i < n_concurrent; ++i) {
+    CUDA_CHECK(cudaStreamCreate(&streams[i]));
+  }
+}
+
+Dispatcher::~Dispatcher() {
+  for (auto &stream : streams) {
+    CUDA_CHECK(cudaStreamDestroy(stream));
+  }
+}
+
+void Dispatcher::run_stage1(const size_t stream_id, bool sync) {
+  ::cuda::run_stage1(app_data, streams[stream_id], sync);
+}
+
+void Dispatcher::run_stage2(const size_t stream_id, bool sync) {
+  ::cuda::run_stage2(app_data, streams[stream_id], sync);
+}
+
+void Dispatcher::run_stage3(const size_t stream_id, bool sync) {
+  ::cuda::run_stage3(app_data, streams[stream_id], sync);
+}
+
+void Dispatcher::run_stage4(const size_t stream_id, bool sync) {
+  ::cuda::run_stage4(app_data, streams[stream_id], sync);
+}
+
+void Dispatcher::run_stage5(const size_t stream_id, bool sync) {
+  ::cuda::run_stage5(app_data, streams[stream_id], sync);
+}
+
+void Dispatcher::run_stage6(const size_t stream_id, bool sync) {
+  ::cuda::run_stage6(app_data, streams[stream_id], sync);
+}
+
+void Dispatcher::run_stage7(const size_t stream_id, bool sync) {
+  ::cuda::run_stage7(app_data, streams[stream_id], sync);
+}
+
+void Dispatcher::run_stage8(const size_t stream_id, bool sync) {
+  ::cuda::run_stage8(app_data, streams[stream_id], sync);
+}
+
+void Dispatcher::run_stage9(const size_t stream_id, bool sync) {
+  ::cuda::run_stage9(app_data, streams[stream_id], sync);
+}
+
 }  // namespace cuda
