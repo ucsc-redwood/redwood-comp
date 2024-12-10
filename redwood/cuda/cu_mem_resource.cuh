@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory_resource>
+
 namespace cuda {
 
 // ----------------------------------------------------------------------------
