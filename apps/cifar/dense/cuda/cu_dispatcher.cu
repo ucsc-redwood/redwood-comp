@@ -6,14 +6,14 @@
 
 namespace cuda {
 
-#define LOG_KERNEL(NAME)                                                 \
-  SPDLOG_DEBUG(                                                          \
-      "CUDA kernel '{}', n = {}, threads = {}, blocks = {}, stream: {}", \
-      NAME,                                                              \
-      total_iterations,                                                  \
-      block_dim,                                                         \
-      grid_dim,                                                          \
-      reinterpret_cast<void *>(stream));
+// #define LOG_KERNEL(NAME)                                                 \
+//   spdlog::debug(                                                         \
+//       "CUDA kernel '{}', n = {}, threads = {}, blocks = {}, stream: {}", \
+//       NAME,                                                              \
+//       total_iterations,                                                  \
+//       block_dim,                                                         \
+//       grid_dim,                                                          \
+//       reinterpret_cast<void *>(stream));
 
 // -----------------------------------------------------------------------------
 // Stage 1 (first conv2d)
@@ -26,8 +26,6 @@ void run_stage1(AppData &app_data, const cudaStream_t stream, bool sync) {
   static constexpr auto block_dim = dim3{256, 1, 1};
   static const auto grid_dim = div_up(total_iterations, block_dim.x);
   static constexpr auto shared_mem = 0;
-
-  LOG_KERNEL("conv2d");
 
   kernels::dense::conv2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_image.data(),
@@ -65,7 +63,7 @@ void run_stage2(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto grid_dim = div_up(total_iterations, block_dim.x);
   static constexpr auto shared_mem = 0;
 
-  LOG_KERNEL("maxpool2d");
+  //   LOG_KERNEL("maxpool2d");
 
   kernels::dense::maxpool2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_conv1_out.data(),
@@ -95,7 +93,7 @@ void run_stage3(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto grid_dim = div_up(total_iterations, block_dim.x);
   static constexpr auto shared_mem = 0;
 
-  LOG_KERNEL("conv2d");
+  //   LOG_KERNEL("conv2d");
 
   kernels::dense::conv2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_pool1_out.data(),
@@ -133,7 +131,7 @@ void run_stage4(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto grid_dim = div_up(total_iterations, block_dim.x);
   static constexpr auto shared_mem = 0;
 
-  LOG_KERNEL("maxpool2d");
+  //   LOG_KERNEL("maxpool2d");
 
   kernels::dense::maxpool2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_conv2_out.data(),
@@ -163,7 +161,7 @@ void run_stage5(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto grid_dim = div_up(total_iterations, block_dim.x);
   static constexpr auto shared_mem = 0;
 
-  LOG_KERNEL("conv2d");
+  //   LOG_KERNEL("conv2d");
 
   kernels::dense::conv2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_pool2_out.data(),
@@ -201,7 +199,7 @@ void run_stage6(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto grid_dim = div_up(total_iterations, block_dim.x);
   static constexpr auto shared_mem = 0;
 
-  LOG_KERNEL("conv2d");
+  //   LOG_KERNEL("conv2d");
 
   kernels::dense::conv2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_conv3_out.data(),
@@ -239,7 +237,7 @@ void run_stage7(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto grid_dim = div_up(total_iterations, block_dim.x);
   static constexpr auto shared_mem = 0;
 
-  LOG_KERNEL("conv2d");
+  //   LOG_KERNEL("conv2d");
 
   kernels::dense::conv2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_conv4_out.data(),
@@ -277,7 +275,7 @@ void run_stage8(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto grid_dim = div_up(total_iterations, block_dim.x);
   static constexpr auto shared_mem = 0;
 
-  LOG_KERNEL("maxpool2d");
+  //   LOG_KERNEL("maxpool2d");
 
   kernels::dense::maxpool2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_conv5_out.data(),
@@ -306,7 +304,7 @@ void run_stage9(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto grid_dim = div_up(total_iterations, block_dim.x);
   static constexpr auto shared_mem = 0;
 
-  LOG_KERNEL("linear");
+  //   LOG_KERNEL("linear");
 
   kernels::dense::linear<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_pool3_out.data(),

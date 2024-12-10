@@ -106,7 +106,7 @@ void run_cuda_demo() {
   cuda::run_stage6(app_data, stream);
   cuda::run_stage7(app_data, stream);
   cuda::run_stage8(app_data, stream);
-  cuda::run_stage9(app_data, stream);
+  cuda::run_stage9(app_data, stream, true);
 
   print_prediction(arg_max(app_data.u_linear_out.data()));
 
