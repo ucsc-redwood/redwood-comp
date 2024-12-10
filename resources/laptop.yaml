@@ -1,0 +1,68 @@
+# My PC has 16 cores, all of them are small cores, just use 6 for now
+cpu_info:
+  total_cores: 16
+  cores:
+    - id: 0
+      max_frequency: 5300
+      type: small
+      pinnable: true
+    - id: 1
+      max_frequency: 5300
+      type: small
+      pinnable: true
+    - id: 2
+      max_frequency: 5300
+      type: small
+      pinnable: true
+    - id: 3
+      max_frequency: 5300
+      type: small
+      pinnable: true
+    - id: 4
+      max_frequency: 5300
+      type: small
+      pinnable: true
+    - id: 5
+      max_frequency: 5300
+      type: small
+      pinnable: true
+    # - id: 6
+    #   max_frequency: 5300
+    #   type: small
+    #   pinnable: true
+    # - id: 7
+    #   max_frequency: 5300
+    #   type: small
+    #   pinnable: true
+    # - id: 8
+    #   max_frequency: 5300
+    #   type: small
+    #   pinnable: true
+    # - id: 9
+    #   max_frequency: 5300
+    #   type: small
+    #   pinnable: true
+    # - id: 10
+    #   max_frequency: 5300
+    #   type: small
+    #   pinnable: true
+    # - id: 11
+    #   max_frequency: 5300
+    #   type: small
+    #   pinnable: true
+    # - id: 12
+    #   max_frequency: 5300
+    #   type: small
+    #   pinnable: true
+    # - id: 13
+    #   max_frequency: 5300
+    #   type: small
+    #   pinnable: true
+    # - id: 14
+    #   max_frequency: 5300
+    #   type: small
+    #   pinnable: true
+    # - id: 15
+    #   max_frequency: 5300
+    #   type: small
+    #   pinnable: true

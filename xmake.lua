@@ -15,4 +15,5 @@ includes("redwood/host")
 includes("redwood/cuda")
 includes("redwood/vulkan")
 
+includes("utility")
 includes("apps")
