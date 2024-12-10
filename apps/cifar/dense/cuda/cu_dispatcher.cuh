@@ -4,7 +4,6 @@
 
 namespace cuda {
 
-
 // clang-format off
 void run_stage1(AppData &app_data, const cudaStream_t stream, bool sync = false);
 void run_stage2(AppData &app_data, const cudaStream_t stream, bool sync = false);

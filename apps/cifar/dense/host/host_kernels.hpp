@@ -13,7 +13,7 @@ namespace dense {
 // ----------------------------------------------------------------------------
 
 void conv2d_mt(const float* input_data,
-               [[maybe_unused]] const int image_input_channels,
+               const int image_input_channels,
                int input_height,
                int input_width,
                const float* weight_data,
@@ -43,6 +43,7 @@ void maxpool2d_mt(const float* input_data,
                   int pool_size,
                   int stride,
                   float* output_data,
+                  // Threading parameters
                   int start,
                   int end);
 
@@ -56,6 +57,7 @@ void linear_mt(const float* input,
                float* output,
                uint32_t input_size,
                uint32_t output_size,
+               // Threading parameters
                int start,
                int end);
 

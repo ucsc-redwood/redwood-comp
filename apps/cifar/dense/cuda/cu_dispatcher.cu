@@ -1,3 +1,4 @@
+#include <cuda_runtime_api.h>
 #include <spdlog/spdlog.h>
 
 #include "cu_dispatcher.cuh"
@@ -15,6 +16,15 @@ namespace cuda {
 //       grid_dim,                                                          \
 //       reinterpret_cast<void *>(stream));
 
+//   static constexpr auto block_dim = dim3{256, 1, 1};
+//   static const auto grid_dim = div_up(total_iterations, block_dim.x);
+//   static constexpr auto shared_mem = 0;
+
+// #define SETUP_DEFAULT_LAUNCH_PARAMS(TOTAL_ITER, BLOCK_SIZE)     \
+//   static constexpr auto block_dim = dim3{BLOCK_SIZE, 1, 1};     \
+//   static const auto grid_dim = div_up(TOTAL_ITER, block_dim.x); \
+//   static constexpr auto shared_mem = 0;
+
 // -----------------------------------------------------------------------------
 // Stage 1 (first conv2d)
 // -----------------------------------------------------------------------------
@@ -23,9 +33,7 @@ void run_stage1(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto total_iterations =
       model::kConv1OutChannels * model::kConv1OutHeight * model::kConv1OutWidth;
 
-  static constexpr auto block_dim = dim3{256, 1, 1};
-  static const auto grid_dim = div_up(total_iterations, block_dim.x);
-  static constexpr auto shared_mem = 0;
+  SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
 
   kernels::dense::conv2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_image.data(),
@@ -59,11 +67,7 @@ void run_stage2(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto total_iterations =
       model::kConv1OutChannels * model::kPool1OutHeight * model::kPool1OutWidth;
 
-  static constexpr auto block_dim = dim3{256, 1, 1};
-  static const auto grid_dim = div_up(total_iterations, block_dim.x);
-  static constexpr auto shared_mem = 0;
-
-  //   LOG_KERNEL("maxpool2d");
+  SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
 
   kernels::dense::maxpool2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_conv1_out.data(),
@@ -89,11 +93,7 @@ void run_stage3(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto total_iterations =
       model::kConv2OutChannels * model::kConv2OutHeight * model::kConv2OutWidth;
 
-  static constexpr auto block_dim = dim3{256, 1, 1};
-  static const auto grid_dim = div_up(total_iterations, block_dim.x);
-  static constexpr auto shared_mem = 0;
-
-  //   LOG_KERNEL("conv2d");
+  SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
 
   kernels::dense::conv2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_pool1_out.data(),
@@ -127,9 +127,7 @@ void run_stage4(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto total_iterations =
       model::kConv2OutChannels * model::kPool2OutHeight * model::kPool2OutWidth;
 
-  static constexpr auto block_dim = dim3{256, 1, 1};
-  static const auto grid_dim = div_up(total_iterations, block_dim.x);
-  static constexpr auto shared_mem = 0;
+  SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
 
   //   LOG_KERNEL("maxpool2d");
 
@@ -157,11 +155,7 @@ void run_stage5(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto total_iterations =
       model::kConv3OutChannels * model::kConv3OutHeight * model::kConv3OutWidth;
 
-  static constexpr auto block_dim = dim3{256, 1, 1};
-  static const auto grid_dim = div_up(total_iterations, block_dim.x);
-  static constexpr auto shared_mem = 0;
-
-  //   LOG_KERNEL("conv2d");
+  SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
 
   kernels::dense::conv2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_pool2_out.data(),
@@ -195,9 +189,7 @@ void run_stage6(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto total_iterations =
       model::kConv4OutChannels * model::kConv4OutHeight * model::kConv4OutWidth;
 
-  static constexpr auto block_dim = dim3{256, 1, 1};
-  static const auto grid_dim = div_up(total_iterations, block_dim.x);
-  static constexpr auto shared_mem = 0;
+  SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
 
   //   LOG_KERNEL("conv2d");
 
@@ -233,9 +225,7 @@ void run_stage7(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto total_iterations =
       model::kConv5OutChannels * model::kConv5OutHeight * model::kConv5OutWidth;
 
-  static constexpr auto block_dim = dim3{256, 1, 1};
-  static const auto grid_dim = div_up(total_iterations, block_dim.x);
-  static constexpr auto shared_mem = 0;
+  SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
 
   //   LOG_KERNEL("conv2d");
 
@@ -271,9 +261,7 @@ void run_stage8(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto total_iterations =
       model::kConv5OutChannels * model::kPool3OutHeight * model::kPool3OutWidth;
 
-  static constexpr auto block_dim = dim3{256, 1, 1};
-  static const auto grid_dim = div_up(total_iterations, block_dim.x);
-  static constexpr auto shared_mem = 0;
+  SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
 
   //   LOG_KERNEL("maxpool2d");
 
@@ -300,9 +288,7 @@ void run_stage8(AppData &app_data, const cudaStream_t stream, bool sync) {
 void run_stage9(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto total_iterations = model::kLinearOutFeatures;
 
-  static constexpr auto block_dim = dim3{256, 1, 1};
-  static const auto grid_dim = div_up(total_iterations, block_dim.x);
-  static constexpr auto shared_mem = 0;
+  SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
 
   //   LOG_KERNEL("linear");
 
