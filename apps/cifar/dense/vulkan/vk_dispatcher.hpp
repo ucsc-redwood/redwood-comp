@@ -8,6 +8,20 @@ namespace vulkan {
 struct Dispatcher {
   explicit Dispatcher(Engine &engine, AppData &app_data);
 
+  void run_stage1(Sequence *seq);
+  void run_stage2(Sequence *seq);
+  void run_stage3(Sequence *seq);
+  void run_stage4(Sequence *seq);
+  void run_stage5(Sequence *seq);
+  void run_stage6(Sequence *seq);
+  void run_stage7(Sequence *seq);
+  void run_stage8(Sequence *seq);
+  void run_stage9(Sequence *seq);
+
+  Engine &engine_ref;
+  AppData &app_data_ref;
+  std::unordered_map<std::string, std::shared_ptr<Algorithm>> algorithms;
+
   struct Conv2dPushConstants {
     uint32_t input_height;
     uint32_t input_width;
@@ -38,20 +52,6 @@ struct Dispatcher {
     uint32_t in_features;
     uint32_t out_features;
   };
-
-  void run_stage1(Sequence *seq);
-  void run_stage2(Sequence *seq);
-  void run_stage3(Sequence *seq);
-  void run_stage4(Sequence *seq);
-  void run_stage5(Sequence *seq);
-  void run_stage6(Sequence *seq);
-  void run_stage7(Sequence *seq);
-  void run_stage8(Sequence *seq);
-  void run_stage9(Sequence *seq);
-
-  Engine &engine_ref;
-  AppData &app_data_ref;
-  std::unordered_map<std::string, std::shared_ptr<Algorithm>> algorithms;
 };
 
 }  // namespace vulkan

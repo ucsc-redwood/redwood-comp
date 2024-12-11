@@ -89,28 +89,25 @@ void run_vulkan_demo() {
 
 #include "cuda/cu_dispatcher.cuh"
 #include "redwood/cuda/cu_mem_resource.cuh"
-#include "redwood/cuda/helpers.cuh"
 
 void run_cuda_demo() {
-  cudaStream_t stream;
-  CUDA_CHECK(cudaStreamCreate(&stream));
-
   cuda::CudaMemoryResource mr;
-
   AppData app_data(&mr);
-  cuda::run_stage1(app_data, stream);
-  cuda::run_stage2(app_data, stream);
-  cuda::run_stage3(app_data, stream);
-  cuda::run_stage4(app_data, stream);
-  cuda::run_stage5(app_data, stream);
-  cuda::run_stage6(app_data, stream);
-  cuda::run_stage7(app_data, stream);
-  cuda::run_stage8(app_data, stream);
-  cuda::run_stage9(app_data, stream);
+
+  constexpr auto n_concurrent = 1;
+  cuda::Dispatcher dispatcher(app_data, n_concurrent);
+
+  dispatcher.run_stage1(0);
+  dispatcher.run_stage2(0);
+  dispatcher.run_stage3(0);
+  dispatcher.run_stage4(0);
+  dispatcher.run_stage5(0);
+  dispatcher.run_stage6(0);
+  dispatcher.run_stage7(0);
+  dispatcher.run_stage8(0);
+  dispatcher.run_stage9(0, true);
 
   print_prediction(arg_max(app_data.u_linear_out.data()));
-
-  CUDA_CHECK(cudaStreamDestroy(stream));
 }
 
 #endif
