@@ -47,6 +47,40 @@ class CPU_Pinned : public benchmark::Fixture {
   std::unique_ptr<AppData> app_data;
 };
 
+class CPU_Unpinned : public benchmark::Fixture {
+ protected:
+  void SetUp(benchmark::State&) override {
+    app_data =
+        std::make_unique<AppData>(std::pmr::new_delete_resource(), kInputSize);
+
+    // need to run all stages so some we can have real data
+    all_cores.reserve(g_small_cores.size() + g_medium_cores.size() +
+                      g_big_cores.size());
+    all_cores.insert(
+        all_cores.end(), g_small_cores.begin(), g_small_cores.end());
+    all_cores.insert(
+        all_cores.end(), g_medium_cores.begin(), g_medium_cores.end());
+    all_cores.insert(all_cores.end(), g_big_cores.begin(), g_big_cores.end());
+    const auto n_threads = all_cores.size();
+
+    // unpinned
+    core::thread_pool pool(all_cores, false);
+
+    cpu::run_stage1(*app_data, pool, n_threads);
+    cpu::run_stage2(*app_data, pool, n_threads);
+    cpu::run_stage3(*app_data, pool, n_threads);
+    cpu::run_stage4(*app_data, pool, n_threads);
+    cpu::run_stage5(*app_data, pool, n_threads);
+    cpu::run_stage6(*app_data, pool, n_threads);
+    cpu::run_stage7(*app_data, pool, n_threads);
+  }
+
+  void TearDown(benchmark::State&) override { app_data.reset(); }
+
+  std::unique_ptr<AppData> app_data;
+  std::vector<int> all_cores;
+};
+
 // ----------------------------------------------------------------------------
 // Benchmarks
 // ----------------------------------------------------------------------------
@@ -137,6 +171,48 @@ void RegisterBenchmarkWithRange(const int n_small_cores,
 #undef REGISTER_BENCHMARK
 }
 
+#define DEFINE_UNPINNED_BENCHMARK(NAME)       \
+  BENCHMARK_DEFINE_F(CPU_Unpinned, NAME)      \
+  (benchmark::State & state) {                \
+    const auto n_threads = state.range(0);    \
+    core::thread_pool pool(all_cores, false); \
+    for (auto _ : state) {                    \
+      cpu::NAME(*app_data, pool, n_threads);  \
+    }                                         \
+  }
+
+DEFINE_UNPINNED_BENCHMARK(run_stage1)
+DEFINE_UNPINNED_BENCHMARK(run_stage2)
+DEFINE_UNPINNED_BENCHMARK(run_stage3)
+DEFINE_UNPINNED_BENCHMARK(run_stage4)
+DEFINE_UNPINNED_BENCHMARK(run_stage5)
+DEFINE_UNPINNED_BENCHMARK(run_stage6)
+DEFINE_UNPINNED_BENCHMARK(run_stage7)
+
+#undef DEFINE_UNPINNED_BENCHMARK
+
+void RegisterUnpinnedBenchmarkWithRange(const int n_cores) {
+#define REGISTER_UNPINNED_BENCHMARK(NAME)             \
+  for (int i = 1; i <= n_cores; ++i) {                \
+    ::benchmark::internal::RegisterBenchmarkInternal( \
+        new CPU_Unpinned_##NAME##_Benchmark())        \
+        ->Arg(i)                                      \
+        ->Name("CPU_Unpinned/" #NAME)                 \
+        ->Unit(benchmark::kMillisecond)               \
+        ->Iterations(100);                            \
+  }
+
+  REGISTER_UNPINNED_BENCHMARK(run_stage1)
+  REGISTER_UNPINNED_BENCHMARK(run_stage2)
+  REGISTER_UNPINNED_BENCHMARK(run_stage3)
+  REGISTER_UNPINNED_BENCHMARK(run_stage4)
+  REGISTER_UNPINNED_BENCHMARK(run_stage5)
+  REGISTER_UNPINNED_BENCHMARK(run_stage6)
+  REGISTER_UNPINNED_BENCHMARK(run_stage7)
+
+#undef REGISTER_UNPINNED_BENCHMARK
+}
+
 // ----------------------------------------------------------------------------
 // Main
 // ----------------------------------------------------------------------------
@@ -146,6 +222,9 @@ int main(int argc, char** argv) {
 
   RegisterBenchmarkWithRange(
       g_small_cores.size(), g_medium_cores.size(), g_big_cores.size());
+
+  RegisterUnpinnedBenchmarkWithRange(
+      g_small_cores.size() + g_medium_cores.size() + g_big_cores.size());
 
   // --------------------------------------------------------------------------
   // Run benchmarks
