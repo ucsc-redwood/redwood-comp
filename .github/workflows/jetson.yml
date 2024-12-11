@@ -26,4 +26,4 @@ jobs:
 
       - name: Run the Program
         run: |
-          xmake r bm-cifar-dense -d jetson
+          xmake r bm-cifar-dense-cpu -d jetson
