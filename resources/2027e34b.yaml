@@ -1,0 +1,36 @@
+# Xiaomi 14 Pro
+cpu_info:
+  total_cores: 8
+  cores:
+    - id: 0
+      max_frequency: 2035
+      type: small
+      pinnable: true
+    - id: 1
+      max_frequency: 2035
+      type: small
+      pinnable: true
+    - id: 2
+      max_frequency: 2438
+      type: medium
+      pinnable: true
+    - id: 3
+      max_frequency: 2438
+      type: medium
+      pinnable: true
+    - id: 4
+      max_frequency: 2438
+      type: medium
+      pinnable: true
+    - id: 5
+      max_frequency: 2438
+      type: medium
+      pinnable: true
+    - id: 6
+      max_frequency: 2438
+      type: medium
+      pinnable: true
+    - id: 7
+      max_frequency: 2035
+      type: small
+      pinnable: true
