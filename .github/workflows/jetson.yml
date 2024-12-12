@@ -1,0 +1,27 @@
+name: Build and Run on Server A
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - refactor
+
+jobs:
+  build-and-run:
+    runs-on: [self-hosted]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set Jetson Environment
+        run: |
+          just set-jetson
+
+      - name: Build with XMake
+        run: |
+          xmake
+
+      - name: Run the Program
+        run: |
+          xmake r bm-cifar-dense-cpu -d jetson
