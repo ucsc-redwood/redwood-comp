@@ -26,19 +26,19 @@ void print_output(const AppData& app_data) {
 #include <cuda_runtime_api.h>
 
 #include "cuda/device_dispatchers.cuh"
-#include "redwood/cuda/cu_dispatcher.cuh"
+// #include "redwood/cuda/cu_dispatcher.cuh"
 #include "redwood/cuda/cu_mem_resource.cuh"
 
 void run_cuda_backend_demo(size_t n) {
   auto mr = std::make_shared<cuda::CudaMemoryResource>();
 
   AppData app_data(mr.get(), n);
-  cuda::CuDispatcher disp(mr, 1);
+  // cuda::CuDispatcher disp(mr, 1);
 
-  cuda::run_stage1(app_data, disp.stream(0));
-  disp.sync(0);
+  // cuda::run_stage1(app_data, disp.stream(0));
+  // disp.sync(0);
 
-  print_output(app_data);
+  // print_output(app_data);
 }
 
 #endif

@@ -1,3 +1,5 @@
+-- Utility targets that helps you know more about your system
+
 target("check-affinity")
     set_kind("binary")
     add_files("check-affinity.cpp")
