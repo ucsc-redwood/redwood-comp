@@ -16,10 +16,6 @@ jobs:
         run: |
           just set-jetson
 
-      - name: Configure XMake
-        run: |
-          xmake f --cuda-backend=y -v
-
       - name: Build with XMake
         run: |
           xmake
