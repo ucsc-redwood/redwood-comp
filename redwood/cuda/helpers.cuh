@@ -28,6 +28,16 @@ inline void cudaCheck(cudaError_t err, const char *file, int line) {
   static const auto grid_dim = div_up(TOTAL_ITER, block_dim.x); \
   static constexpr auto shared_mem = 0;
 
+#define SPDLOG_DEBUG_LAUNCH_PARAMS(KERNEL_NAME)                              \
+  SPDLOG_DEBUG(                                                              \
+      "Launching {} kernel: total_iterations={}, grid_dim={}, block_dim={} " \
+      "on stream {}",                                                        \
+      KERNEL_NAME,                                                           \
+      total_iterations,                                                      \
+      grid_dim,                                                              \
+      block_dim.x,                                                           \
+      (void *)stream);
+
 // ----------------------------------------------------------------------------
 // Math
 // ----------------------------------------------------------------------------

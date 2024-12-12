@@ -7,24 +7,6 @@
 
 namespace cuda {
 
-// #define LOG_KERNEL(NAME)                                                 \
-//   spdlog::debug(                                                         \
-//       "CUDA kernel '{}', n = {}, threads = {}, blocks = {}, stream: {}", \
-//       NAME,                                                              \
-//       total_iterations,                                                  \
-//       block_dim,                                                         \
-//       grid_dim,                                                          \
-//       reinterpret_cast<void *>(stream));
-
-//   static constexpr auto block_dim = dim3{256, 1, 1};
-//   static const auto grid_dim = div_up(total_iterations, block_dim.x);
-//   static constexpr auto shared_mem = 0;
-
-// #define SETUP_DEFAULT_LAUNCH_PARAMS(TOTAL_ITER, BLOCK_SIZE)     \
-//   static constexpr auto block_dim = dim3{BLOCK_SIZE, 1, 1};     \
-//   static const auto grid_dim = div_up(TOTAL_ITER, block_dim.x); \
-//   static constexpr auto shared_mem = 0;
-
 // -----------------------------------------------------------------------------
 // Stage 1 (first conv2d)
 // -----------------------------------------------------------------------------
@@ -34,6 +16,7 @@ void run_stage1(AppData &app_data, const cudaStream_t stream, bool sync) {
       model::kConv1OutChannels * model::kConv1OutHeight * model::kConv1OutWidth;
 
   SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
+  SPDLOG_DEBUG_LAUNCH_PARAMS("conv2d");
 
   kernels::dense::conv2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_image.data(),
@@ -68,6 +51,7 @@ void run_stage2(AppData &app_data, const cudaStream_t stream, bool sync) {
       model::kConv1OutChannels * model::kPool1OutHeight * model::kPool1OutWidth;
 
   SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
+  SPDLOG_DEBUG_LAUNCH_PARAMS("maxpool2d");
 
   kernels::dense::maxpool2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_conv1_out.data(),
@@ -94,6 +78,7 @@ void run_stage3(AppData &app_data, const cudaStream_t stream, bool sync) {
       model::kConv2OutChannels * model::kConv2OutHeight * model::kConv2OutWidth;
 
   SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
+  SPDLOG_DEBUG_LAUNCH_PARAMS("conv2d");
 
   kernels::dense::conv2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_pool1_out.data(),
@@ -128,8 +113,7 @@ void run_stage4(AppData &app_data, const cudaStream_t stream, bool sync) {
       model::kConv2OutChannels * model::kPool2OutHeight * model::kPool2OutWidth;
 
   SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
-
-  //   LOG_KERNEL("maxpool2d");
+  SPDLOG_DEBUG_LAUNCH_PARAMS("maxpool2d");
 
   kernels::dense::maxpool2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_conv2_out.data(),
@@ -156,6 +140,7 @@ void run_stage5(AppData &app_data, const cudaStream_t stream, bool sync) {
       model::kConv3OutChannels * model::kConv3OutHeight * model::kConv3OutWidth;
 
   SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
+  SPDLOG_DEBUG_LAUNCH_PARAMS("conv2d");
 
   kernels::dense::conv2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_pool2_out.data(),
@@ -190,8 +175,7 @@ void run_stage6(AppData &app_data, const cudaStream_t stream, bool sync) {
       model::kConv4OutChannels * model::kConv4OutHeight * model::kConv4OutWidth;
 
   SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
-
-  //   LOG_KERNEL("conv2d");
+  SPDLOG_DEBUG_LAUNCH_PARAMS("conv2d");
 
   kernels::dense::conv2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_conv3_out.data(),
@@ -226,8 +210,7 @@ void run_stage7(AppData &app_data, const cudaStream_t stream, bool sync) {
       model::kConv5OutChannels * model::kConv5OutHeight * model::kConv5OutWidth;
 
   SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
-
-  //   LOG_KERNEL("conv2d");
+  SPDLOG_DEBUG_LAUNCH_PARAMS("conv2d");
 
   kernels::dense::conv2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_conv4_out.data(),
@@ -262,8 +245,7 @@ void run_stage8(AppData &app_data, const cudaStream_t stream, bool sync) {
       model::kConv5OutChannels * model::kPool3OutHeight * model::kPool3OutWidth;
 
   SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
-
-  //   LOG_KERNEL("maxpool2d");
+  SPDLOG_DEBUG_LAUNCH_PARAMS("maxpool2d");
 
   kernels::dense::maxpool2d<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_conv5_out.data(),
@@ -289,8 +271,7 @@ void run_stage9(AppData &app_data, const cudaStream_t stream, bool sync) {
   static const auto total_iterations = model::kLinearOutFeatures;
 
   SETUP_DEFAULT_LAUNCH_PARAMS(total_iterations, 256);
-
-  //   LOG_KERNEL("linear");
+  SPDLOG_DEBUG_LAUNCH_PARAMS("linear");
 
   kernels::dense::linear<<<grid_dim, block_dim, shared_mem, stream>>>(
       app_data.u_pool3_out.data(),
@@ -306,7 +287,7 @@ void run_stage9(AppData &app_data, const cudaStream_t stream, bool sync) {
 }
 
 // -----------------------------------------------------------------------------
-// Dispatcher Class
+// Dispatcher Class Functions
 // -----------------------------------------------------------------------------
 
 Dispatcher::Dispatcher(AppData &app_data, size_t n_concurrent)
@@ -322,39 +303,39 @@ Dispatcher::~Dispatcher() {
   }
 }
 
-void Dispatcher::run_stage1(const size_t stream_id, bool sync) {
+void Dispatcher::run_stage1(const size_t stream_id, const bool sync) {
   ::cuda::run_stage1(app_data, streams[stream_id], sync);
 }
 
-void Dispatcher::run_stage2(const size_t stream_id, bool sync) {
+void Dispatcher::run_stage2(const size_t stream_id, const bool sync) {
   ::cuda::run_stage2(app_data, streams[stream_id], sync);
 }
 
-void Dispatcher::run_stage3(const size_t stream_id, bool sync) {
+void Dispatcher::run_stage3(const size_t stream_id, const bool sync) {
   ::cuda::run_stage3(app_data, streams[stream_id], sync);
 }
 
-void Dispatcher::run_stage4(const size_t stream_id, bool sync) {
+void Dispatcher::run_stage4(const size_t stream_id, const bool sync) {
   ::cuda::run_stage4(app_data, streams[stream_id], sync);
 }
 
-void Dispatcher::run_stage5(const size_t stream_id, bool sync) {
+void Dispatcher::run_stage5(const size_t stream_id, const bool sync) {
   ::cuda::run_stage5(app_data, streams[stream_id], sync);
 }
 
-void Dispatcher::run_stage6(const size_t stream_id, bool sync) {
+void Dispatcher::run_stage6(const size_t stream_id, const bool sync) {
   ::cuda::run_stage6(app_data, streams[stream_id], sync);
 }
 
-void Dispatcher::run_stage7(const size_t stream_id, bool sync) {
+void Dispatcher::run_stage7(const size_t stream_id, const bool sync) {
   ::cuda::run_stage7(app_data, streams[stream_id], sync);
 }
 
-void Dispatcher::run_stage8(const size_t stream_id, bool sync) {
+void Dispatcher::run_stage8(const size_t stream_id, const bool sync) {
   ::cuda::run_stage8(app_data, streams[stream_id], sync);
 }
 
-void Dispatcher::run_stage9(const size_t stream_id, bool sync) {
+void Dispatcher::run_stage9(const size_t stream_id, const bool sync) {
   ::cuda::run_stage9(app_data, streams[stream_id], sync);
 }
 
