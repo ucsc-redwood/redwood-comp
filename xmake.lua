@@ -17,3 +17,5 @@ includes("redwood/vulkan")
 
 includes("utility")
 includes("apps")
+
+-- includes("apps/playground")

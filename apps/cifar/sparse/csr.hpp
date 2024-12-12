@@ -44,26 +44,13 @@ struct CSRMatrix final : public BaseAppData {
   UsmVector<int> u_col_indices;
   UsmVector<int> u_row_ptr;
 
-  //   // Allocate memory on the device for given dimensions and nnz
-  //   void allocate(int r, int c, int n) {
-  //     rows = r;
-  //     cols = c;
-  //     nnz = n;
-  //     cudaMalloc(&d_values, nnz * sizeof(double));
-  //     cudaMalloc(&d_col_indices, nnz * sizeof(int));
-  //     cudaMalloc(&d_row_ptr, (rows + 1) * sizeof(int));
-  //   }
-
-  //   // Free device memory
-  //   void deallocate() {
-  //     if (d_values) cudaFree(d_values);
-  //     if (d_col_indices) cudaFree(d_col_indices);
-  //     if (d_row_ptr) cudaFree(d_row_ptr);
-
-  //     d_values = nullptr;
-  //     d_col_indices = nullptr;
-  //     d_row_ptr = nullptr;
-  //   }
 };
 
 }  // namespace v2
+
+
+namespace v3 {
+
+  
+
+}
