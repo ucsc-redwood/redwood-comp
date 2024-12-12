@@ -4,7 +4,7 @@
 #include "sparse_app_data.hpp"
 #include "tmp/original_kernels.hpp"
 
-void run_cpu_demo() {
+void run_cpu_demo_v1() {
   auto mr = std::pmr::new_delete_resource();
   SparseAppData app_data(mr);
 
