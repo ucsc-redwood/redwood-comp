@@ -1,14 +1,11 @@
 local cpp_source = {
-  -- "host/*.cpp",
-  -- "../app_data.cpp",
-  -- "csr.cpp",
-  -- "tmp/original_kernels.cpp",
+  "host/*.cpp",
   "app_data.cpp"
 }
 
 local cpp_header = {
   "./*.hpp",
-  -- "host/*.hpp"
+  "host/*.hpp"
 }
 
 target("app-cifar-sparse-new")

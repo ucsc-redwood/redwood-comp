@@ -13,8 +13,8 @@
 
 //   std::ifstream file(base_path / filename);
 //   if (!file.is_open()) {
-//     spdlog::error("Could not open file '{}'", (base_path / filename).string());
-//     return;
+//     spdlog::error("Could not open file '{}'", (base_path /
+//     filename).string()); return;
 //   }
 
 //   for (int i = 0; i < size; ++i) {
@@ -27,29 +27,28 @@
 // }
 
 void readDataFromFile(const char* filename, float* data, int maxSize) {
-    const auto base_path = helpers::get_resource_base_path();
-    
-    std::ifstream file(base_path / filename);
-    if (!file.is_open()) {
-        spdlog::error("Could not open the file - '{}'", filename);
-        return;
-    }
+  const auto base_path = helpers::get_resource_base_path();
 
-    // Zero initialize the entire array
-    for (int i = 0; i < maxSize; ++i) {
-        data[i] = 0.0f;
-    }
+  std::ifstream file(base_path / filename);
+  if (!file.is_open()) {
+    spdlog::error("Could not open the file - '{}'", filename);
+    return;
+  }
 
-    // Read available values
-    float value;
-    int count = 0;
-    while (file >> value && count < maxSize) {
-        data[count++] = value;
-    }
+  // Zero initialize the entire array
+  for (int i = 0; i < maxSize; ++i) {
+    data[i] = 0.0f;
+  }
 
-    file.close();
+  // Read available values
+  float value;
+  int count = 0;
+  while (file >> value && count < maxSize) {
+    data[count++] = value;
+  }
+
+  file.close();
 }
-
 
 void readCSRFromFiles(const char* values_file,
                       const char* row_ptr_file,
@@ -76,6 +75,9 @@ void readCSRFromFiles(const char* values_file,
 
 AppData::AppData(std::pmr::memory_resource* mr)
     : BaseAppData(mr),
+      // Image data
+      u_image_data(3 * 32 * 32, mr),
+
       // Conv1 arrays
       u_conv1_values(MAX_NNZ_CONV1, mr),
       u_conv1_row_ptr(65, mr),  // 64 + 1
@@ -128,8 +130,10 @@ AppData::AppData(std::pmr::memory_resource* mr)
   // Similar to the dense version but with different file paths and formats
 
   // Load image data
-  float image_data[3 * 32 * 32];
-  readDataFromFile("images/flattened_bird_bird_57.txt", image_data, 3072);
+  //   readDataFromFile(
+  //       "images/flattened_bird_bird_57.txt", u_image_data.data(), 3072);
+  readDataFromFile(
+      "images/flattened_dog_dog_13.txt", u_image_data.data(), 3072);
 
   // Load CSR data for all layers
   readCSRFromFiles("sparse/conv1_values.txt",
