@@ -178,7 +178,7 @@ void run_cpu_demo_v1() {
 int main(int argc, char** argv) {
   INIT_APP("cifar-sparse");
 
-  run_cpu_demo();
+  run_cpu_demo_v1();
 
   return 0;
 }
