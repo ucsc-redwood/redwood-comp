@@ -4,6 +4,9 @@
 #include "redwood/backends.hpp"
 #include "redwood/host/thread_pool.hpp"
 
+// Forward declarations
+void run_cuda_demo_v1();
+
 [[nodiscard]] inline int arg_max(const float* ptr) {
   const auto max_index =
       std::distance(ptr, std::ranges::max_element(ptr, ptr + 10));
