@@ -1,6 +1,7 @@
 #include "../../app.hpp"
 #include "app_data.hpp"
 #include "host/host_dispatcher.hpp"
+#include "redwood/backends.hpp"
 #include "redwood/host/thread_pool.hpp"
 
 [[nodiscard]] inline int arg_max(const float* ptr) {
@@ -41,7 +42,7 @@ void run_cpu_demo_v1() {
   cpu::kernels::sparse::run_stage3(app_data, pool, n_threads, true);
   cpu::kernels::sparse::run_stage4(app_data, pool, n_threads, true);
   cpu::kernels::sparse::run_stage5(app_data, pool, n_threads, true);
-  cpu::kernels::sparse::run_stage6(app_data, pool, n_threads,   true);
+  cpu::kernels::sparse::run_stage6(app_data, pool, n_threads, true);
   cpu::kernels::sparse::run_stage7(app_data, pool, n_threads, true);
   cpu::kernels::sparse::run_stage8(app_data, pool, n_threads, true);
   cpu::kernels::sparse::run_stage9(app_data, pool, n_threads, true);
@@ -49,10 +50,40 @@ void run_cpu_demo_v1() {
   print_prediction(arg_max(app_data.u_linear_output.data()));
 }
 
+#ifdef REDWOOD_CUDA_BACKEND
+
+#include "cuda/cu_dispatcher.cuh"
+#include "redwood/cuda/cu_mem_resource.cuh"
+
+void run_cuda_demo_v1() {
+  cuda::CudaMemoryResource mr;
+  AppData app_data(&mr);
+
+  cuda::Dispatcher dispatcher(app_data, g_small_cores.size());
+
+  dispatcher.run_stage1(0, true);
+  dispatcher.run_stage2(0, true);
+  dispatcher.run_stage3(0, true);
+  dispatcher.run_stage4(0, true);
+  dispatcher.run_stage5(0, true);
+  dispatcher.run_stage6(0, true);
+  dispatcher.run_stage7(0, true);
+  dispatcher.run_stage8(0, true);
+  dispatcher.run_stage9(0, true);
+
+  print_prediction(arg_max(app_data.u_linear_output.data()));
+}
+
+#endif
+
 int main(int argc, char** argv) {
   INIT_APP("cifar-sparse");
 
   run_cpu_demo_v1();
+
+  if constexpr (is_backend_enabled(BackendType::kCUDA)) {
+    run_cuda_demo_v1();
+  }
 
   return 0;
 }

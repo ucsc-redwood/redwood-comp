@@ -29,7 +29,7 @@ inline void cudaCheck(cudaError_t err, const char *file, int line) {
   static constexpr auto shared_mem = 0;
 
 #define SPDLOG_DEBUG_LAUNCH_PARAMS(KERNEL_NAME)                              \
-  SPDLOG_DEBUG(                                                              \
+  spdlog::debug(                                                             \
       "Launching {} kernel: total_iterations={}, grid_dim={}, block_dim={} " \
       "on stream {}",                                                        \
       KERNEL_NAME,                                                           \
