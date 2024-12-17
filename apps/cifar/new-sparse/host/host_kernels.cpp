@@ -9,30 +9,34 @@ namespace kernels {
 
 namespace sparse {
 
-void conv2d(const float* input_data,
-            int image_input_channels,
-            int input_height,
-            int input_width,
-            const CSRMatrix& weight_matrix,
-            const float* bias_data,
-            int bias_size,
-            int kernel_size,
-            int stride,
-            int padding,
-            bool relu,
-            float* output_data) {
+//  start, end = 0, weight_matrix.rows;
+void conv2d_mt(const float* input_data,
+               [[maybe_unused]] int image_input_channels,
+               int input_height,
+               int input_width,
+               const CSRMatrix& weight_matrix,
+               const float* bias_data,
+               int bias_size,
+               int kernel_size,
+               int stride,
+               int padding,
+               bool relu,
+               float* output_data,
+               int start,
+               int end) {
   int output_height = (input_height + 2 * padding - kernel_size) / stride + 1;
   int output_width = (input_width + 2 * padding - kernel_size) / stride + 1;
-  int output_channels = weight_matrix.rows;
-  int spatial_size = kernel_size * kernel_size * image_input_channels;
+  // int output_channels = weight_matrix.rows;
+  // int spatial_size = kernel_size * kernel_size * image_input_channels;
 
-  // Zero initialize output
-  int output_size = output_channels * output_height * output_width;
-  for (int i = 0; i < output_size; ++i) {
-    output_data[i] = 0.0f;
-  }
+  // // Zero initialize output
+  // int output_size = output_channels * output_height * output_width;
+  // for (int i = 0; i < output_size; ++i) {
+  //   output_data[i] = 0.0f;
+  // }
 
-  for (int out_c = 0; out_c < output_channels; ++out_c) {
+  for (int out_c = start; out_c < end; ++out_c) {
+    // for (int out_c = 0; out_c < output_channels; ++out_c) {
     int row_start = weight_matrix.row_ptr[out_c];
     int row_end = weight_matrix.row_ptr[out_c + 1];
 
@@ -72,18 +76,21 @@ void conv2d(const float* input_data,
   }
 }
 
-void maxpool2d(const float* input_data,
-               int input_channels,
-               int input_height,
-               int input_width,
-               int pool_size,
-               int stride,
-               float* output_data) {
+// start, end = 0, input_channels * output_height * output_width
+void maxpool2d_mt(const float* input_data,
+                  [[maybe_unused]] int input_channels,
+                  int input_height,
+                  int input_width,
+                  int pool_size,
+                  int stride,
+                  float* output_data,
+                  int start,
+                  int end) {
   int output_height = (input_height - pool_size) / stride + 1;
   int output_width = (input_width - pool_size) / stride + 1;
-  int total_iterations = input_channels * output_height * output_width;
+  // int total_iterations = input_channels * output_height * output_width;
 
-  for (int index = 0; index < total_iterations; index++) {
+  for (int index = start; index < end; index++) {
     int c = index / (output_height * output_width);
     int h = (index / output_width) % output_height;
     int w = index % output_width;
@@ -107,11 +114,14 @@ void maxpool2d(const float* input_data,
   }
 }
 
-void linear(const float* input_data,
-            const CSRMatrix& weight_matrix,
-            const float* bias_data,
-            float* output_data) {
-  for (int i = 0; i < weight_matrix.rows; ++i) {
+// start, end = 0, weight_matrix.rows
+void linear_mt(const float* input_data,
+               const CSRMatrix& weight_matrix,
+               const float* bias_data,
+               float* output_data,
+               int start,
+               int end) {
+  for (int i = start; i < end; ++i) {
     float sum = 0.0f;
 
     for (int nz_idx = weight_matrix.row_ptr[i];
