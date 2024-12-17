@@ -1,10 +1,10 @@
 local cpp_source = {
   "host/*.cpp",
-  "../app_data.cpp"
+  "app_data.cpp"
 }
 
 local cpp_header = {
-  "../*.hpp",
+  "./*.hpp",
   "host/*.hpp"
 }
 
@@ -12,7 +12,7 @@ local cpp_header = {
 -- Application
 -- ----------------------------------------------------------------------------
 
-target("app-cifar-dense")
+target("app-cifar-sparse-new")
     set_kind("binary")
     add_includedirs("$(projectdir)")
     add_headerfiles(cpp_header)
@@ -40,12 +40,13 @@ target("app-cifar-dense")
       add_deps("vk-backend")
       add_packages("vulkan-hpp", "vulkan-memory-allocator")
     end
+target_end()
 
 -- ----------------------------------------------------------------------------
 -- Host Benchmark
 -- ----------------------------------------------------------------------------
 
-target("bm-cifar-dense-cpu")
+target("bm-cifar-sparse-cpu")
     set_kind("binary")
     add_includedirs("$(projectdir)")
     add_headerfiles(cpp_header)
@@ -64,7 +65,7 @@ target("bm-cifar-dense-cpu")
 
 if has_config("vulkan-backend") then
 
-target("bm-cifar-dense-vk")
+target("bm-cifar-sparse-vk")
     set_kind("binary")
     add_includedirs("$(projectdir)")
     add_headerfiles(cpp_header)
@@ -86,13 +87,14 @@ target_end()
 
 end
 
+
 -- ----------------------------------------------------------------------------
 -- CUDA Benchmark
 -- ----------------------------------------------------------------------------
 
 if has_config("cuda-backend") then
 
-target("bm-cifar-dense-cuda")
+target("bm-cifar-sparse-cuda")
     set_kind("binary")
     add_includedirs("$(projectdir)")
     add_headerfiles(cpp_header)

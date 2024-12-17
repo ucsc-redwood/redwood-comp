@@ -1,0 +1,25 @@
+{
+    "name": "Ubuntu 24.04 CUDA Dev Container",
+    "image": "nvidia/cuda:12.6.3-devel-ubuntu24.04",
+    "runArgs": [
+        "--privileged",
+        "--device",
+        "/dev/nvidia0",
+        "--device",
+        "/dev/nvidiactl"
+    ],
+    "remoteUser": "root",
+    "postCreateCommand": "apt update && apt install -y build-essential cmake git wget xmake",
+    "features": {},
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash"
+            },
+            "extensions": [
+                "ms-vscode.cpptools",
+                "xmake.xmake-vscode"
+            ]
+        }
+    }
+}

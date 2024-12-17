@@ -104,7 +104,6 @@ target("bm-tree-cuda")
     add_headerfiles("cuda/*.cuh")
     add_files("cuda/*.cu")
     add_cugencodes("native")
-
 target_end()
 
 end
