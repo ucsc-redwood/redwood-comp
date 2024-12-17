@@ -16,18 +16,19 @@ run-utility:
     xmake r print-core-info
     xmake r check-affinity
 
-run-bm-cpu:
-    xmake r bm-cifar-dense-cpu
-    xmake r bm-cifar-sparse-cpu
-    xmake r bm-tree-cpu
+run-bm-pc:
+    xmake r bm-cifar-dense-cpu -d pc
+    xmake r bm-cifar-sparse-cpu -d pc
+    xmake r bm-tree-cpu -d pc
 
-run-bm-vk:
+run-bm-android:
     xmake r bm-cifar-dense-vk
     xmake r bm-cifar-sparse-vk
     xmake r bm-tree-vk
 
-run-bm-cuda:
-    xmake r bm-cifar-dense-cuda
-    xmake r bm-cifar-sparse-cuda
-    xmake r bm-tree-cuda
+run-bm-jetson:
+    xmake r bm-cifar-dense-cuda -d jetson
+    xmake r bm-cifar-sparse-cuda -d jetson
+    xmake r bm-tree-cuda -d jetson
+
 
