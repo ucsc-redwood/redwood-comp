@@ -22,49 +22,49 @@ namespace kernels {
 
 namespace sparse {
 
-  // Input Image dimensions
-  constexpr int kInputChannels = 3;
-  constexpr int kInputHeight = 32;
-  constexpr int kInputWidth = 32;
+// Input Image dimensions
+constexpr int kInputChannels = 3;
+constexpr int kInputHeight = 32;
+constexpr int kInputWidth = 32;
 
-  // Convolution parameters
-  constexpr int kKernelSize = 3;
-  constexpr int kStride = 1;
-  constexpr int kPadding = 1;
+// Convolution parameters
+constexpr int kKernelSize = 3;
+constexpr int kStride = 1;
+constexpr int kPadding = 1;
 
-  // Pooling parameters
-  constexpr int kPoolSize = 2;
-  constexpr int kPoolStride = 2;
+// Pooling parameters
+constexpr int kPoolSize = 2;
+constexpr int kPoolStride = 2;
 
-  constexpr bool kRelu = true;
+constexpr bool kRelu = true;
 
-  void run_stage1(AppData& app_data,
-                  core::thread_pool& pool,
-                  const size_t n_threads,
-                  const bool sync) {
-    constexpr auto start = 0;
-    const auto end = app_data.conv1_weights.rows;
+void run_stage1(AppData& app_data,
+                core::thread_pool& pool,
+                const size_t n_threads,
+                const bool sync) {
+  constexpr auto start = 0;
+  const auto end = app_data.conv1_weights.rows;
 
-    print_kernel_params("stage1: conv2d_mt", start, end, n_threads);
+  print_kernel_params("stage1: conv2d_mt", start, end, n_threads);
 
-    auto ret = pool.submit_blocks(
-        start,
-        end,
-        [&](const int start, const int end) {
-          cpu::kernels::sparse::conv2d_mt(app_data.u_image_data.data(),
-                                          kInputChannels,
-                                          kInputHeight,
-                                          kInputWidth,
-                                          app_data.conv1_weights,
-                                          app_data.u_conv1_bias.data(),
-                                          64,
-                                          kKernelSize,
-                                          kStride,
-                                          kPadding,
-                                          kRelu,
-                                          app_data.u_conv1_output.data(),
-                                          start,
-                                          end);
+  auto ret = pool.submit_blocks(
+      start,
+      end,
+      [&](const int start, const int end) {
+        cpu::kernels::sparse::conv2d_mt(app_data.u_image_data.data(),
+                                        kInputChannels,
+                                        kInputHeight,
+                                        kInputWidth,
+                                        app_data.conv1_weights,
+                                        app_data.u_conv1_bias.data(),
+                                        64,
+                                        kKernelSize,
+                                        kStride,
+                                        kPadding,
+                                        kRelu,
+                                        app_data.u_conv1_output.data(),
+                                        start,
+                                        end);
       },
       n_threads);
 

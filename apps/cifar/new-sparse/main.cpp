@@ -5,7 +5,8 @@
 #include "redwood/host/thread_pool.hpp"
 
 // Forward declarations
-void run_cuda_demo_v1();
+void run_cuda_demo();
+void run_vulkan_demo();
 
 [[nodiscard]] inline int arg_max(const float* ptr) {
   const auto max_index =
@@ -58,7 +59,7 @@ void run_cpu_demo_v1() {
 #include "cuda/cu_dispatcher.cuh"
 #include "redwood/cuda/cu_mem_resource.cuh"
 
-void run_cuda_demo_v1() {
+void run_cuda_demo() {
   cuda::CudaMemoryResource mr;
   AppData app_data(&mr);
 
@@ -79,13 +80,23 @@ void run_cuda_demo_v1() {
 
 #endif
 
+#ifdef REDWOOD_VULKAN_BACKEND
+
+void run_vulkan_demo() {}
+
+#endif
+
 int main(int argc, char** argv) {
   INIT_APP("cifar-sparse");
 
   run_cpu_demo_v1();
 
   if constexpr (is_backend_enabled(BackendType::kCUDA)) {
-    run_cuda_demo_v1();
+    run_cuda_demo();
+  }
+
+  if constexpr (is_backend_enabled(BackendType::kVulkan)) {
+    run_vulkan_demo();
   }
 
   return 0;
