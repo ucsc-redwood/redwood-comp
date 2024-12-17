@@ -15,3 +15,19 @@ set-default:
 run-utility:
     xmake r print-core-info
     xmake r check-affinity
+
+run-bm-cpu:
+    xmake r bm-cifar-dense-cpu
+    xmake r bm-cifar-sparse-cpu
+    xmake r bm-tree-cpu
+
+run-bm-vk:
+    xmake r bm-cifar-dense-vk
+    xmake r bm-cifar-sparse-vk
+    xmake r bm-tree-vk
+
+run-bm-cuda:
+    xmake r bm-cifar-dense-cuda
+    xmake r bm-cifar-sparse-cuda
+    xmake r bm-tree-cuda
+
