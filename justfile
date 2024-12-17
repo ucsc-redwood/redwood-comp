@@ -18,17 +18,26 @@ run-utility:
 
 run-bm-pc:
     xmake r bm-cifar-dense-cpu -d pc
+    xmake r bm-cifar-dense-cuda -d pc
     xmake r bm-cifar-sparse-cpu -d pc
+    xmake r bm-cifar-sparse-cuda -d pc
     xmake r bm-tree-cpu -d pc
+    xmake r bm-tree-cuda -d pc
 
 run-bm-android:
+    xmake r bm-cifar-dense-cpu
     xmake r bm-cifar-dense-vk
+    xmake r bm-cifar-sparse-cpu 
     xmake r bm-cifar-sparse-vk
+    xmake r bm-tree-cpu
     xmake r bm-tree-vk
 
 run-bm-jetson:
+    xmake r bm-cifar-dense-cpu -d jetson
     xmake r bm-cifar-dense-cuda -d jetson
+    xmake r bm-cifar-sparse-cpu -d jetson
     xmake r bm-cifar-sparse-cuda -d jetson
+    xmake r bm-tree-cpu -d jetson
     xmake r bm-tree-cuda -d jetson
 
 
