@@ -1,7 +1,7 @@
 add_rules("mode.debug", "mode.release")
 
 set_languages("c++20")
-set_toolchains("clang")
+-- set_toolchains("clang")
 set_warnings("allextra")
 
 -- Global requirements, for all projects
