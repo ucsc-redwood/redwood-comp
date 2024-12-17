@@ -82,7 +82,27 @@ void run_cuda_demo() {
 
 #ifdef REDWOOD_VULKAN_BACKEND
 
-void run_vulkan_demo() {}
+#include "vulkan/vk_dispatchers.hpp"
+
+void run_vulkan_demo() {
+  vulkan::Engine engine;
+  AppData app_data(engine.get_mr());
+
+  vulkan::Dispatcher dispatcher(engine, app_data);
+
+  auto seq = engine.sequence();
+  dispatcher.run_stage1(seq.get(), true);
+  dispatcher.run_stage2(seq.get(), true);
+  dispatcher.run_stage3(seq.get(), true);
+  dispatcher.run_stage4(seq.get(), true);
+  dispatcher.run_stage5(seq.get(), true);
+  dispatcher.run_stage6(seq.get(), true);
+  dispatcher.run_stage7(seq.get(), true);
+  dispatcher.run_stage8(seq.get(), true);
+  dispatcher.run_stage9(seq.get(), true);
+
+  print_prediction(arg_max(app_data.u_linear_output.data()));
+}
 
 #endif
 
