@@ -56,7 +56,7 @@ struct AppData : public BaseAppData {
   // float conv5_bias[256];
   // float linear_bias[10];
 
-  UsmVector<float> u_image_data;
+  UsmVector<float> u_image_data;  // initial input
 
   UsmVector<float> u_conv1_values;
   UsmVector<int> u_conv1_row_ptr;
@@ -90,7 +90,7 @@ struct AppData : public BaseAppData {
   UsmVector<float> u_conv4_output;
   UsmVector<float> u_conv5_output;
   UsmVector<float> u_pool3_output;
-  UsmVector<float> u_linear_output;
+  UsmVector<float> u_linear_output;  // final output
 
   UsmVector<float> u_conv1_bias;
   UsmVector<float> u_conv2_bias;
