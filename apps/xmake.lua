@@ -27,8 +27,7 @@ add_requires("cli11")
 
 includes("hello_world")
 includes("cifar/dense")
--- includes("cifar/sparse")
-includes("cifar/new-sparse")
+includes("cifar/sparse")
 includes("tree")
 
 -- includes("tmp")

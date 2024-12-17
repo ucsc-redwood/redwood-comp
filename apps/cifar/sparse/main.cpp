@@ -1,184 +1,123 @@
 #include "../../app.hpp"
-#include "../arg_max.hpp"
-#include "csr.hpp"
-#include "sparse_app_data.hpp"
-#include "tmp/original_kernels.hpp"
+#include "app_data.hpp"
+#include "host/host_dispatcher.hpp"
+#include "redwood/backends.hpp"
+#include "redwood/host/thread_pool.hpp"
+
+// Forward declarations
+void run_cuda_demo();
+void run_vulkan_demo();
+
+[[nodiscard]] inline int arg_max(const float* ptr) {
+  const auto max_index =
+      std::distance(ptr, std::ranges::max_element(ptr, ptr + 10));
+
+  return max_index;
+}
+
+inline void print_prediction(const int max_index) {
+  static const std::unordered_map<int, std::string_view> class_names{
+      {0, "airplanes"},
+      {1, "cars"},
+      {2, "birds"},
+      {3, "cats"},
+      {4, "deer"},
+      {5, "dogs"},
+      {6, "frogs"},
+      {7, "horses"},
+      {8, "ships"},
+      {9, "trucks"}};
+
+  std::cout << "Predicted Image: ";
+  std::cout << (class_names.contains(max_index) ? class_names.at(max_index)
+                                                : "Unknown");
+  std::cout << std::endl;
+}
 
 void run_cpu_demo_v1() {
   auto mr = std::pmr::new_delete_resource();
-  SparseAppData app_data(mr);
+  AppData app_data(mr);
 
-  static constexpr float sparsity_threshold = 1e-6;
+  core::thread_pool pool(g_small_cores);
+  const auto n_threads = g_small_cores.size();
 
-  // Convert image to CSR
-  const v1::CSRMatrix sparse_image =
-      v1::denseToCsr(app_data.u_image.data(),
-                     model::kInputChannels,
-                     model::kInputHeight * model::kInputWidth,
-                     sparsity_threshold);
+  cpu::kernels::sparse::run_stage1(app_data, pool, n_threads, true);
+  cpu::kernels::sparse::run_stage2(app_data, pool, n_threads, true);
+  cpu::kernels::sparse::run_stage3(app_data, pool, n_threads, true);
+  cpu::kernels::sparse::run_stage4(app_data, pool, n_threads, true);
+  cpu::kernels::sparse::run_stage5(app_data, pool, n_threads, true);
+  cpu::kernels::sparse::run_stage6(app_data, pool, n_threads, true);
+  cpu::kernels::sparse::run_stage7(app_data, pool, n_threads, true);
+  cpu::kernels::sparse::run_stage8(app_data, pool, n_threads, true);
+  cpu::kernels::sparse::run_stage9(app_data, pool, n_threads, true);
 
-  // Convert Conv1 weights to CSR
-  const v1::CSRMatrix sparse_conv1_weights = v1::denseToCsr(
-      app_data.u_conv1_weights.data(),
-      model::kConv1OutChannels,
-      model::kInputChannels * model::kKernelSize * model::kKernelSize,
-      sparsity_threshold);
-
-  // Conv1
-  cpu::sparse::kernels::sparseConv2d(sparse_image,
-                                     model::kInputHeight,
-                                     model::kInputWidth,
-                                     sparse_conv1_weights,
-                                     model::kConv1OutChannels,
-                                     app_data.u_conv1_bias.data(),
-                                     model::kKernelSize,
-                                     model::kStride,
-                                     model::kPadding,
-                                     model::kRelu,
-                                     app_data.u_conv1_out.data());
-
-  // Convert Conv1 output to CSR
-  v1::CSRMatrix sparse_conv1_out =
-      v1::denseToCsr(app_data.u_conv1_out.data(),
-                     model::kConv1OutChannels,
-                     model::kConv1OutHeight * model::kConv1OutWidth,
-                     sparsity_threshold);
-
-  // Pool1
-  cpu::sparse::kernels::sparseMaxPool2d(sparse_conv1_out,
-                                        model::kConv1OutChannels,
-                                        model::kConv1OutHeight,
-                                        model::kConv1OutWidth,
-                                        model::kPoolSize,
-                                        model::kPoolStride,
-                                        app_data.u_pool1_out.data());
-
-  v1::CSRMatrix sparse_pool1_out =
-      v1::denseToCsr(app_data.u_pool1_out.data(),
-                     model::kConv1OutChannels,
-                     model::kPool1OutHeight * model::kPool1OutWidth,
-                     sparsity_threshold);
-
-  // Conv2
-  cpu::sparse::kernels::sparseConv2d(sparse_pool1_out,
-                                     model::kPool1OutHeight,
-                                     model::kPool1OutWidth,
-                                     app_data.sparse_conv2_weights,
-                                     model::kConv2OutChannels,
-                                     app_data.u_conv2_bias.data(),
-                                     model::kKernelSize,
-                                     model::kStride,
-                                     model::kPadding,
-                                     model::kRelu,
-                                     app_data.u_conv2_out.data());
-
-  v1::CSRMatrix sparse_conv2_out =
-      v1::denseToCsr(app_data.u_conv2_out.data(),
-                     model::kConv2OutChannels,
-                     model::kConv2OutHeight * model::kConv2OutWidth,
-                     sparsity_threshold);
-
-  // Pool2
-  cpu::sparse::kernels::sparseMaxPool2d(sparse_conv2_out,
-                                        model::kConv2OutChannels,
-                                        model::kConv2OutHeight,
-                                        model::kConv2OutWidth,
-                                        model::kPoolSize,
-                                        model::kPoolStride,
-                                        app_data.u_pool2_out.data());
-
-  v1::CSRMatrix sparse_pool2_out =
-      v1::denseToCsr(app_data.u_pool2_out.data(),
-                     model::kConv2OutChannels,
-                     model::kPool2OutHeight * model::kPool2OutWidth,
-                     sparsity_threshold);
-
-  // Conv3
-  cpu::sparse::kernels::sparseConv2d(sparse_pool2_out,
-                                     model::kPool2OutHeight,
-                                     model::kPool2OutWidth,
-                                     app_data.sparse_conv3_weights,
-                                     model::kConv3OutChannels,
-                                     app_data.u_conv3_bias.data(),
-                                     model::kKernelSize,
-                                     model::kStride,
-                                     model::kPadding,
-                                     model::kRelu,
-                                     app_data.u_conv3_out.data());
-
-  v1::CSRMatrix sparse_conv3_out =
-      v1::denseToCsr(app_data.u_conv3_out.data(),
-                     model::kConv3OutChannels,
-                     model::kConv3OutHeight * model::kConv3OutWidth,
-                     sparsity_threshold);
-
-  // Conv4
-  cpu::sparse::kernels::sparseConv2d(sparse_conv3_out,
-                                     model::kConv3OutHeight,
-                                     model::kConv3OutWidth,
-                                     app_data.sparse_conv4_weights,
-                                     model::kConv4OutChannels,
-                                     app_data.u_conv4_bias.data(),
-                                     model::kKernelSize,
-                                     model::kStride,
-                                     model::kPadding,
-                                     model::kRelu,
-                                     app_data.u_conv4_out.data());
-
-  v1::CSRMatrix sparse_conv4_out =
-      v1::denseToCsr(app_data.u_conv4_out.data(),
-                     model::kConv4OutChannels,
-                     model::kConv4OutHeight * model::kConv4OutWidth,
-                     sparsity_threshold);
-
-  // Conv5
-  cpu::sparse::kernels::sparseConv2d(sparse_conv4_out,
-                                     model::kConv4OutHeight,
-                                     model::kConv4OutWidth,
-                                     app_data.sparse_conv5_weights,
-                                     model::kConv5OutChannels,
-                                     app_data.u_conv5_bias.data(),
-                                     model::kKernelSize,
-                                     model::kStride,
-                                     model::kPadding,
-                                     model::kRelu,
-                                     app_data.u_conv5_out.data());
-
-  v1::CSRMatrix sparse_conv5_out =
-      v1::denseToCsr(app_data.u_conv5_out.data(),
-                     model::kConv5OutChannels,
-                     model::kConv5OutHeight * model::kConv5OutWidth,
-                     sparsity_threshold);
-
-  // Pool3
-  cpu::sparse::kernels::sparseMaxPool2d(sparse_conv5_out,
-                                        model::kConv5OutChannels,
-                                        model::kConv5OutHeight,
-                                        model::kConv5OutWidth,
-                                        model::kPoolSize,
-                                        model::kPoolStride,
-                                        app_data.u_pool3_out.data());
-
-  // Flatten output for linear layer
-  v1::CSRMatrix sparse_flattened = v1::denseToCsr(app_data.u_pool3_out.data(),
-                                                  1,
-                                                  model::kLinearInFeatures,
-                                                  sparsity_threshold);
-
-  // Linear
-  cpu::sparse::kernels::sparseLinearLayer(sparse_flattened,
-                                          app_data.sparse_linear_weights,
-                                          app_data.u_linear_bias.data(),
-                                          app_data.u_linear_out.data(),
-                                          model::kLinearOutFeatures);
-
-  print_prediction(arg_max(app_data.u_linear_out.data()));
+  print_prediction(arg_max(app_data.u_linear_output.data()));
 }
+
+#ifdef REDWOOD_CUDA_BACKEND
+
+#include "cuda/cu_dispatcher.cuh"
+#include "redwood/cuda/cu_mem_resource.cuh"
+
+void run_cuda_demo() {
+  cuda::CudaMemoryResource mr;
+  AppData app_data(&mr);
+
+  cuda::Dispatcher dispatcher(app_data, g_small_cores.size());
+
+  dispatcher.run_stage1(0, true);
+  dispatcher.run_stage2(0, true);
+  dispatcher.run_stage3(0, true);
+  dispatcher.run_stage4(0, true);
+  dispatcher.run_stage5(0, true);
+  dispatcher.run_stage6(0, true);
+  dispatcher.run_stage7(0, true);
+  dispatcher.run_stage8(0, true);
+  dispatcher.run_stage9(0, true);
+
+  print_prediction(arg_max(app_data.u_linear_output.data()));
+}
+
+#endif
+
+#ifdef REDWOOD_VULKAN_BACKEND
+
+#include "vulkan/vk_dispatchers.hpp"
+
+void run_vulkan_demo() {
+  vulkan::Engine engine;
+  AppData app_data(engine.get_mr());
+
+  vulkan::Dispatcher dispatcher(engine, app_data);
+
+  auto seq = engine.sequence();
+  dispatcher.run_stage1(seq.get(), true);
+  dispatcher.run_stage2(seq.get(), true);
+  dispatcher.run_stage3(seq.get(), true);
+  dispatcher.run_stage4(seq.get(), true);
+  dispatcher.run_stage5(seq.get(), true);
+  dispatcher.run_stage6(seq.get(), true);
+  dispatcher.run_stage7(seq.get(), true);
+  dispatcher.run_stage8(seq.get(), true);
+  dispatcher.run_stage9(seq.get(), true);
+
+  print_prediction(arg_max(app_data.u_linear_output.data()));
+}
+
+#endif
 
 int main(int argc, char** argv) {
   INIT_APP("cifar-sparse");
 
   run_cpu_demo_v1();
+
+  if constexpr (is_backend_enabled(BackendType::kCUDA)) {
+    run_cuda_demo();
+  }
+
+  if constexpr (is_backend_enabled(BackendType::kVulkan)) {
+    run_vulkan_demo();
+  }
 
   return 0;
 }
