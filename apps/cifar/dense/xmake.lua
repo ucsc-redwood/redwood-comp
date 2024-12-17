@@ -8,6 +8,10 @@ local cpp_header = {
   "host/*.hpp"
 }
 
+-- ----------------------------------------------------------------------------
+-- Application
+-- ----------------------------------------------------------------------------
+
 target("app-cifar-dense")
     set_kind("binary")
     add_includedirs("$(projectdir)")
@@ -37,6 +41,10 @@ target("app-cifar-dense")
       add_packages("vulkan-hpp", "vulkan-memory-allocator")
     end
 
+-- ----------------------------------------------------------------------------
+-- Host Benchmark
+-- ----------------------------------------------------------------------------
+
 target("bm-cifar-dense-cpu")
     set_kind("binary")
     add_includedirs("$(projectdir)")
@@ -49,6 +57,10 @@ target("bm-cifar-dense-cpu")
     end
 
     add_packages("benchmark")
+
+-- ----------------------------------------------------------------------------
+-- Vulkan Benchmark
+-- ----------------------------------------------------------------------------
 
 if has_config("vulkan-backend") then
 
@@ -74,6 +86,10 @@ target_end()
 
 end
 
+-- ----------------------------------------------------------------------------
+-- CUDA Benchmark
+-- ----------------------------------------------------------------------------
+
 if has_config("cuda-backend") then
 
 target("bm-cifar-dense-cuda")
@@ -94,8 +110,6 @@ target("bm-cifar-dense-cuda")
     add_headerfiles("cuda/*.cuh")
     add_files("cuda/*.cu")
     add_cugencodes("native")
-    -- add_cuflags("-allow-unsupported-compiler")
-    -- set_cuflags("-Xcompiler '-fallow-unsupported-compiler'")
 target_end()
 
 end
