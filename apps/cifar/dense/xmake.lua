@@ -94,7 +94,8 @@ target("bm-cifar-dense-cuda")
     add_headerfiles("cuda/*.cuh")
     add_files("cuda/*.cu")
     add_cugencodes("native")
-
+    -- add_cuflags("-allow-unsupported-compiler")
+    -- set_cuflags("-Xcompiler '-fallow-unsupported-compiler'")
 target_end()
 
 end

@@ -14,6 +14,7 @@ target("app-hello")
       add_headerfiles("cuda/*.cuh")
       add_files("cuda/*.cu")
       add_cugencodes("native")
+      add_cuflags("-allow-unsupported-compiler")
     end
 
     -- Android related (optional)

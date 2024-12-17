@@ -41,7 +41,7 @@ void run_cpu_demo_v1() {
   cpu::kernels::sparse::run_stage3(app_data, pool, n_threads, true);
   cpu::kernels::sparse::run_stage4(app_data, pool, n_threads, true);
   cpu::kernels::sparse::run_stage5(app_data, pool, n_threads, true);
-  cpu::kernels::sparse::run_stage6(app_data, pool, n_threads, true);
+  cpu::kernels::sparse::run_stage6(app_data, pool, n_threads,   true);
   cpu::kernels::sparse::run_stage7(app_data, pool, n_threads, true);
   cpu::kernels::sparse::run_stage8(app_data, pool, n_threads, true);
   cpu::kernels::sparse::run_stage9(app_data, pool, n_threads, true);
