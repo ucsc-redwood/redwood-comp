@@ -118,6 +118,10 @@ void run_vulkan_only() {
     dispatcher.run_stage7(seq.get(), true);
     dispatcher.run_stage8(seq.get(), true);
     dispatcher.run_stage9(seq.get(), true);
+
+    if (i % 100 == 0) {
+      std::cout << "." << std::flush;
+    }
   }
 
   auto end = std::chrono::high_resolution_clock::now();
