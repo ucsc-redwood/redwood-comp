@@ -15,6 +15,9 @@
 
 #include "vk.hpp"
 
+namespace vulkan {
+
+
 // Externally defined VMA allocator (you must have this created and initialized
 // somewhere)
 extern VmaAllocator g_vma_allocator;
@@ -83,3 +86,5 @@ class VulkanMemoryResource : public std::pmr::memory_resource {
   mutable std::mutex mutex_;
   std::unordered_map<void *, VulkanAllocationRecord> allocations_;
 };
+
+}  // namespace vulkan

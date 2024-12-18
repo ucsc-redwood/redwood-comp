@@ -1,5 +1,8 @@
 #include "vma_pmr.hpp"
 
+namespace vulkan {
+
+
 VulkanMemoryResource::VulkanMemoryResource(vk::Device device,
                                            vk::BufferUsageFlags buffer_usage,
                                            VmaMemoryUsage memory_usage,
@@ -137,3 +140,5 @@ bool VulkanMemoryResource::do_is_equal(
     const std::pmr::memory_resource &other) const noexcept {
   return dynamic_cast<const VulkanMemoryResource *>(&other) != nullptr;
 }
+
+}  // namespace vulkan
