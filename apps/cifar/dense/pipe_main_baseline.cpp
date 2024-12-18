@@ -9,7 +9,7 @@
 void run_vulkan_demo();
 void run_cuda_demo();
 
-constexpr auto n_iterations = 10000;
+constexpr auto n_iterations = 1000;
 constexpr auto n_gpu_iterations = 1000;
 
 void run_cpu_unpinned() {
