@@ -145,9 +145,9 @@ int main(int argc, char** argv) {
     run_cuda_demo(640 * 480);
   }
 
-  if constexpr (is_backend_enabled(BackendType::kVulkan)) {
-    run_vulkan_demo(640 * 480);
-  }
+  // if constexpr (is_backend_enabled(BackendType::kVulkan)) {
+  //   run_vulkan_demo(640 * 480);
+  // }
 
   spdlog::info("Done.");
   return EXIT_SUCCESS;
