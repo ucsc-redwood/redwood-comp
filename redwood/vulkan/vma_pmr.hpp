@@ -15,12 +15,12 @@
 
 #include "vk.hpp"
 
-namespace vulkan {
+extern VmaAllocator g_vma_allocator;
 
+namespace vulkan {
 
 // Externally defined VMA allocator (you must have this created and initialized
 // somewhere)
-extern VmaAllocator g_vma_allocator;
 
 // A small helper macro to check Vulkan results
 inline void CHECK_VK_RESULT(VkResult result, const char *msg) {
