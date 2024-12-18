@@ -59,6 +59,8 @@ void run_vulkan_demo() {
 
   auto seq = engine.sequence();
 
+  auto start = std::chrono::high_resolution_clock::now();
+
   for (size_t i = 0; i < n_gpu_iterations; ++i) {
     dispatcher.run_stage1(seq.get());
     dispatcher.run_stage2(seq.get());
