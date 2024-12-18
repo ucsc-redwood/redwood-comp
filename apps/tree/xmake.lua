@@ -107,3 +107,35 @@ target("bm-tree-cuda")
 target_end()
 
 end
+
+
+
+target("pipe-tree-baseline")
+    set_kind("binary")
+    add_includedirs("$(projectdir)")
+    add_headerfiles("*.hpp", "host/*.hpp")
+    add_files("pipe_main_baseline.cpp", "host/*.cpp")
+    add_packages("spdlog", "cli11", "yaml-cpp")
+    add_packages("glm")
+    add_deps("cpu-backend")
+    if is_plat("android") then
+      on_run(run_on_android)
+    end
+
+    -- CUDA related (optional)
+    if has_config("cuda-backend") then
+      add_defines("REDWOOD_CUDA_BACKEND")
+      add_deps("cu-backend")
+      add_headerfiles("cuda/**/*.cuh")
+      add_files(cu_source_files)
+      add_cugencodes("native")
+    end
+
+    -- Vulkan related (optional)
+    if has_config("vulkan-backend") then
+      add_defines("REDWOOD_VULKAN_BACKEND")
+      add_headerfiles("vulkan/*.hpp")
+      add_files("vulkan/*.cpp")      
+      add_deps("vk-backend")
+      add_packages("vulkan-hpp", "vulkan-memory-allocator")
+    end
