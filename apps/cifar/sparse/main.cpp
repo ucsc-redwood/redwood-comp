@@ -9,10 +9,7 @@ void run_cuda_demo();
 void run_vulkan_demo();
 
 [[nodiscard]] inline int arg_max(const float* ptr) {
-  const auto max_index =
-      std::distance(ptr, std::ranges::max_element(ptr, ptr + 10));
-
-  return max_index;
+  return std::distance(ptr, std::ranges::max_element(ptr, ptr + 10));
 }
 
 inline void print_prediction(const int max_index) {

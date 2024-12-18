@@ -12,7 +12,7 @@ local cpp_header = {
 -- Application
 -- ----------------------------------------------------------------------------
 
-target("app-cifar-sparse-new")
+target("app-cifar-sparse")
     set_kind("binary")
     add_includedirs("$(projectdir)")
     add_headerfiles(cpp_header)
@@ -115,3 +115,19 @@ target("bm-cifar-sparse-cuda")
 target_end()
 
 end
+
+-- ----------------------------------------------------------------------------
+-- Pipe Benchmark
+-- ----------------------------------------------------------------------------
+
+target("pipe-cifar-sparse")
+    set_kind("binary")
+    add_includedirs("$(projectdir)")
+    add_headerfiles(cpp_header)
+    add_files("pipe_main_cpu.cpp", cpp_source)
+    add_packages("spdlog", "cli11", "yaml-cpp")
+    add_deps("cpu-backend")
+    if is_plat("android") then
+      on_run(run_on_android)
+    end
+target_end()
