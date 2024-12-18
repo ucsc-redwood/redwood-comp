@@ -4,6 +4,7 @@
 #include "redwood/backends.hpp"
 
 constexpr auto n_iterations = 10000;
+constexpr auto n_gpu_iterations = 1000;
 
 void run_cuda_only();
 void run_vulkan_only();
@@ -60,8 +61,8 @@ void run_cuda_only() {
 
   auto start = std::chrono::high_resolution_clock::now();
 
-  std::cout << "Running " << n_iterations << " iterations" << std::endl;
-  for (size_t i = 0; i < n_iterations; ++i) {
+  std::cout << "Running " << n_gpu_iterations << " iterations" << std::endl;
+  for (size_t i = 0; i < n_gpu_iterations; ++i) {
     dispatcher.run_stage1(0, true);
     dispatcher.run_stage2(0, true);
     dispatcher.run_stage3(0, true);
@@ -106,8 +107,8 @@ void run_vulkan_only() {
 
   auto start = std::chrono::high_resolution_clock::now();
 
-  std::cout << "Running " << n_iterations << " iterations" << std::endl;
-  for (size_t i = 0; i < n_iterations; ++i) {
+  std::cout << "Running " << n_gpu_iterations << " iterations" << std::endl;
+  for (size_t i = 0; i < n_gpu_iterations; ++i) {
     dispatcher.run_stage1(seq.get(), true);
     dispatcher.run_stage2(seq.get(), true);
     dispatcher.run_stage3(seq.get(), true);
