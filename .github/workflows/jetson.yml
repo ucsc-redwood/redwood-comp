@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - dev
-      - refactor
 
 jobs:
   build-and-run:
@@ -16,12 +15,8 @@ jobs:
 
       - name: Set Jetson Environment
         run: |
-          just set-jetson
+          just set-default
 
       - name: Build with XMake
         run: |
           xmake
-
-      - name: Run the Program
-        run: |
-          xmake r bm-cifar-dense-cpu -d jetson
