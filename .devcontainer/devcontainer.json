@@ -1,16 +1,37 @@
+// {
+//     "name": "Ubuntu 24.04 CUDA Dev Container",
+//     "image": "nvidia/cuda:12.6.3-devel-ubuntu24.04",
+//     "runArgs": [
+//         "--privileged",
+//         "--device",
+//         "/dev/nvidia0",
+//         "--device",
+//         "/dev/nvidiactl"
+//     ],
+//     "remoteUser": "root",
+//     "postCreateCommand": "apt update && apt install -y build-essential cmake git wget xmake p7zip-full fish && ln -s /usr/local/cuda-12.6 /opt/cuda",
+//     "features": {},
+//     "customizations": {
+//         "vscode": {
+//             "settings": {
+//                 "terminal.integrated.defaultProfile.linux": "bash",
+//                 "terminal.integrated.env.linux": {
+//                     "XMAKE_ROOT": "y"
+//                 }
+//             },
+//             "extensions": [
+//                 "ms-vscode.cpptools",
+//                 "xmake.xmake-vscode"
+//             ]
+//         }
+//     }
+// }
 {
-    "name": "Ubuntu 24.04 CUDA Dev Container",
-    "image": "nvidia/cuda:12.6.3-devel-ubuntu24.04",
-    "runArgs": [
-        "--privileged",
-        "--device",
-        "/dev/nvidia0",
-        "--device",
-        "/dev/nvidiactl"
-    ],
-    "remoteUser": "root",
-    "postCreateCommand": "apt update && apt install -y build-essential cmake git wget xmake",
-    "features": {},
+    "name": "CUDA Development Container",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
     "customizations": {
         "vscode": {
             "settings": {
@@ -18,8 +39,20 @@
             },
             "extensions": [
                 "ms-vscode.cpptools",
+                "llvm-vs-code-extensions.vscode-clangd",
+                "xaver.clang-format",
                 "xmake.xmake-vscode"
             ]
         }
-    }
+    },
+    "postCreateCommand": "xmake --version && just --version",
+    "remoteUser": "ubuntu",
+    "mounts": [
+        "source=${localWorkspaceFolder},target=/workspace,type=bind"
+    ],
+    "workspaceFolder": "/workspace",
+    "runArgs": [
+        "--gpus",
+        "all"
+    ]
 }
