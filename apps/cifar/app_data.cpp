@@ -10,20 +10,24 @@ void readDataFromFile(const std::string_view filename,
                       float* data,
                       const int size) {
   const auto base_path = helpers::get_resource_base_path();
+  const auto full_path = base_path / filename;
 
-  std::ifstream file(base_path / filename);
-  if (!file.is_open()) {
-    spdlog::error("Could not open file '{}'", (base_path / filename).string());
-    return;
+  std::ifstream file(full_path, std::ios::binary);
+  if (!file) {
+    throw std::runtime_error(
+        fmt::format("Could not open file '{}'", full_path.string()));
   }
 
-  for (int i = 0; i < size; ++i) {
-    if (!(file >> data[i])) {
-      spdlog::error("Failed to read data at index {}", i);
-      return;
-    }
+  // Read entire file at once for better performance
+  std::vector<float> buffer(size);
+  if (!file.read(reinterpret_cast<char*>(buffer.data()),
+                 size * sizeof(float))) {
+    throw std::runtime_error(fmt::format("Failed to read {} bytes from '{}'",
+                                         size * sizeof(float),
+                                         full_path.string()));
   }
-  file.close();
+
+  std::ranges::copy(buffer, data);
 }
 
 using namespace model;
