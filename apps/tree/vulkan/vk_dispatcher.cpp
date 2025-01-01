@@ -234,10 +234,10 @@ void Dispatcher::run_stage2(Sequence *seq) {
     std::swap(app_data_ref.u_morton_keys, app_data_ref.u_morton_keys_alt);
   }
 
-//   const auto is_sorted =
-//       std::is_sorted(app_data_ref.get_sorted_morton_keys(),
-//                      app_data_ref.get_sorted_morton_keys() + n);
-//   spdlog::info("Is sorted: {}", is_sorted);
+  //   const auto is_sorted =
+  //       std::is_sorted(app_data_ref.get_sorted_morton_keys(),
+  //                      app_data_ref.get_sorted_morton_keys() + n);
+  //   spdlog::info("Is sorted: {}", is_sorted);
 
   //   exit(0);
 }
@@ -302,7 +302,7 @@ void Dispatcher::run_stage3(Sequence *seq) {
     spdlog::trace("u_out_idx[{}] = {}", i, tmp_storage.u_out_idx[i]);
   }
 
-//   spdlog::info("GPU n_unique: {}", n_unique);
+  //   spdlog::info("GPU n_unique: {}", n_unique);
 }
 
 // ----------------------------------------------------------------------------

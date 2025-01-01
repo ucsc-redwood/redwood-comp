@@ -2,7 +2,6 @@
 
 namespace vulkan {
 
-
 VulkanMemoryResource::VulkanMemoryResource(vk::Device device,
                                            vk::BufferUsageFlags buffer_usage,
                                            VmaMemoryUsage memory_usage,
